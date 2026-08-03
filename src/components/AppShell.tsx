@@ -316,7 +316,7 @@ export function AppShell() {
             <div className="flex items-center text-ink-3">
               <button
                 type="button"
-                onClick={() => goToMonth(addMonths(visibleMonth, -1))}
+                onClick={() => goToMonth(addMonths(visibleMonth, -1), today)}
                 aria-label="이전 달"
                 className="px-[6px] py-[2px] text-[13px]"
               >
@@ -324,7 +324,7 @@ export function AppShell() {
               </button>
               <button
                 type="button"
-                onClick={() => goToMonth(addMonths(visibleMonth, 1))}
+                onClick={() => goToMonth(addMonths(visibleMonth, 1), today)}
                 aria-label="다음 달"
                 className="px-[6px] py-[2px] text-[13px]"
               >
@@ -365,7 +365,7 @@ export function AppShell() {
           categories={categories}
           completions={completions}
           onSelect={selectDate}
-          onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta))}
+          onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta), today)}
         />
       </div>
 

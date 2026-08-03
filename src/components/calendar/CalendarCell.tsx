@@ -63,7 +63,9 @@ export function CalendarCell({
         // 내용보다 작아지는 것을 막아 h-[76px]를 무시한다.
         // 그러면 할일이 많은 칸만 세로로 늘어나 격자가 들쭉날쭉해진다.
         "md:h-[76px] md:min-h-0 md:items-stretch md:justify-start md:overflow-hidden md:px-[4px] md:pb-[3px] md:after:hidden",
-        isToday ? "bg-ink font-bold text-white" : "",
+        // 글자는 text-white가 아니라 text-surface다.
+        // 배경이 --ink라서 다크에서 흰 판이 되는데, 흰 글자를 얹으면 1.1:1로 사라진다
+        isToday ? "bg-ink font-bold text-surface" : "",
         !isToday && isSelected ? "ring-[1.5px] ring-ink ring-inset" : "",
       ].join(" ")}
       style={{
@@ -79,7 +81,7 @@ export function CalendarCell({
             task.categoryId ? categoryById.get(task.categoryId)?.color : null,
           );
           const dimmed = isDoneOn(task, date, completions);
-          const color = isToday ? "#ffffff" : tone.dt;
+          const color = isToday ? "var(--surface)" : tone.dt;
 
           // 여러 날 할일은 점이 아니라 막대로 — 기간이라는 것을 형태로 알린다
           return isMultiDay(task) ? (
@@ -102,7 +104,7 @@ export function CalendarCell({
           <span
             aria-hidden
             className="text-[8px] leading-none"
-            style={{ color: isToday ? "#ffffff" : "var(--ink-3)" }}
+            style={{ color: isToday ? "var(--surface)" : "var(--ink-3)" }}
           >
             +{overflow}
           </span>
@@ -123,7 +125,7 @@ export function CalendarCell({
               aria-hidden
               className="h-[4px] w-full rounded-[2px]"
               style={{
-                background: isToday ? "#ffffff" : tone.dt,
+                background: isToday ? "var(--surface)" : tone.dt,
                 opacity: isDoneOn(task, date, completions) ? 0.35 : 1,
               }}
             />
@@ -143,8 +145,8 @@ export function CalendarCell({
               aria-hidden
               className="truncate rounded-[3px] px-[3px] py-[1px] text-left text-[9.5px] leading-[1.3]"
               style={{
-                background: isToday ? "rgba(255,255,255,0.16)" : tone.bg,
-                color: isToday ? "#fff" : tone.tx,
+                background: isToday ? "color-mix(in srgb, var(--surface) 16%, transparent)" : tone.bg,
+                color: isToday ? "var(--surface)" : tone.tx,
                 opacity: isDoneOn(task, date, completions) ? 0.45 : 1,
               }}
             >
@@ -156,7 +158,7 @@ export function CalendarCell({
           <span
             aria-hidden
             className="px-[3px] text-left text-[8.5px] leading-[1.3]"
-            style={{ color: isToday ? "rgba(255,255,255,0.7)" : "var(--ink-3)" }}
+            style={{ color: isToday ? "color-mix(in srgb, var(--surface) 70%, transparent)" : "var(--ink-3)" }}
           >
             +{overflow}
           </span>

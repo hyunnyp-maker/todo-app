@@ -26,7 +26,8 @@ interface UiState {
   setTheme: (mode: ThemeMode) => void;
 
   selectDate: (date: ISODate) => void;
-  goToMonth: (month: ISOMonth) => void;
+  /** today를 함께 받는다 — 옮겨간 달 안으로 선택 날짜를 데려가야 하기 때문이다 */
+  goToMonth: (month: ISOMonth, today: ISODate) => void;
   goToToday: (today: ISODate) => void;
   setCalendarCollapsed: (v: boolean) => void;
   toggleCategory: (id: string) => void;
@@ -78,7 +79,19 @@ export const useUiStore = create<UiState>()(
       selectDate: (date) =>
         set({ selectedDate: date, visibleMonth: monthOf(date) }),
 
-      goToMonth: (month) => set({ visibleMonth: month }),
+      // 달을 넘기면 선택 날짜도 그 달로 데려간다.
+      //
+      // 두고 오면 조회 범위(그 달의 그리드)와 선택 날짜가 어긋난다.
+      // 8월 3일을 고른 채 9월로 넘기면 8월 3일 리스트가 9월 범위에 걸친 것만
+      // 남아 할일이 소리 없이 사라진다. 화면상 "9월을 보는데 8월 3일 목록"이라는
+      // 상태 자체도 설명하기 어렵다.
+      //
+      // 그 달에 오늘이 있으면 오늘로 — 되돌아왔을 때 오늘에 서 있어야 한다 (P2)
+      goToMonth: (month, today) =>
+        set({
+          visibleMonth: month,
+          selectedDate: monthOf(today) === month ? today : `${month}-01`,
+        }),
 
       goToToday: (today) =>
         set({ selectedDate: today, visibleMonth: monthOf(today) }),
