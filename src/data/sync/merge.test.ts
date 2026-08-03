@@ -19,7 +19,7 @@ function task(over: Partial<Task> = {}): Task {
   };
 }
 
-const category: Category = { id: "c1", name: "직장", color: "mist", sortOrder: 0 };
+const category: Category = { id: "c1", name: "직장", color: "blue", sortOrder: 0 };
 
 const create = (id: string, seq: number): QueueOp => ({
   kind: "task.create",

@@ -7,18 +7,18 @@
 
 /** 팔레트 키. DB에는 hex가 아니라 이 키를 저장한다 (05-design 2.2) */
 export type PaletteKey =
-  | "sage"
-  | "rose"
-  | "mist"
-  | "lavender"
-  | "clay"
-  | "mustard"
-  | "olive"
-  | "teal"
-  | "plum"
-  | "sand"
-  | "slate"
-  | "coral";
+  | "red"
+  | "orange"
+  | "yellow"
+  | "green"
+  | "blue"
+  | "pink"
+  | "purple"
+  | "brown"
+  | "ink";
+
+/** 화면 테마. system은 기기 설정을 따라간다 */
+export type ThemeMode = "light" | "dark" | "system";
 
 /**
  * once  — 마감형. 기간 전체에 체크 한 번 (done)

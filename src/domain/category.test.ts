@@ -7,12 +7,17 @@ import {
   nextSortOrder,
   normalizeCategoryName,
 } from "./category";
-import { suggestColor, unusedColors, PALETTE_KEYS } from "./palette";
+import {
+  normalizePaletteKey,
+  suggestColor,
+  unusedColors,
+  PALETTE_KEYS,
+} from "./palette";
 import type { Category, Task } from "./types";
 
 const categories: Category[] = [
-  { id: "work", name: "직장", color: "mist", sortOrder: 0 },
-  { id: "personal", name: "개인", color: "sage", sortOrder: 1 },
+  { id: "work", name: "직장", color: "blue", sortOrder: 0 },
+  { id: "personal", name: "개인", color: "green", sortOrder: 1 },
 ];
 
 function task(over: Partial<Task> = {}): Task {
@@ -106,14 +111,37 @@ describe("삭제 정책", () => {
 
 describe("색 추천", () => {
   it("아직 안 쓴 색을 먼저 준다", () => {
-    expect(suggestColor(["sage", "rose"])).toBe("mist");
-    expect(unusedColors(["sage"])).not.toContain("sage");
+    expect(suggestColor(["green", "pink"])).toBe("blue");
+    expect(unusedColors(["green"])).not.toContain("green");
   });
 
-  it("12색을 다 쓰면 가장 적게 쓰인 색을 준다", () => {
-    const used = [...PALETTE_KEYS, "sage" as const];
+  it("색을 다 쓰면 가장 적게 쓰인 색을 준다", () => {
+    const used = [...PALETTE_KEYS, "green" as const];
     expect(unusedColors(used)).toEqual([]);
-    // sage만 2번, 나머지는 1번 → sage가 아닌 색이 나와야 한다
-    expect(suggestColor(used)).not.toBe("sage");
+    // green만 2번, 나머지는 1번 → green이 아닌 색이 나와야 한다
+    expect(suggestColor(used)).not.toBe("green");
+  });
+});
+
+describe("옛 파스텔 키 이관", () => {
+  it("파스텔 시절 키를 새 비비드 키로 옮긴다", () => {
+    // 이미 저장된 카테고리 색이 사라지면 안 된다
+    expect(normalizePaletteKey("mist")).toBe("blue");
+    expect(normalizePaletteKey("sage")).toBe("green");
+    expect(normalizePaletteKey("clay")).toBe("orange");
+    expect(normalizePaletteKey("slate")).toBe("ink");
+    expect(normalizePaletteKey("coral")).toBe("red");
+  });
+
+  it("새 키는 그대로 통과시킨다", () => {
+    for (const key of PALETTE_KEYS) {
+      expect(normalizePaletteKey(key)).toBe(key);
+    }
+  });
+
+  it("알 수 없는 값은 null", () => {
+    expect(normalizePaletteKey("형광핑크")).toBeNull();
+    expect(normalizePaletteKey(42)).toBeNull();
+    expect(normalizePaletteKey(null)).toBeNull();
   });
 });

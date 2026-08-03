@@ -65,25 +65,35 @@ export function OverdueFold({
             return (
               <li
                 key={task.id}
-                className="flex items-center gap-[8px] rounded-[9px] px-[10px] py-[8px]"
-                style={{ background: tone.bg, color: tone.tx }}
+                className="flex items-center gap-[8px] rounded-[9px] border py-[8px] pl-[10px] pr-[10px]"
+                style={{
+                  background: "var(--card)",
+                  borderColor: "var(--card-border)",
+                  borderLeft: `5px solid ${tone.dt}`,
+                  color: "var(--ink)",
+                }}
               >
                 <button
                   type="button"
                   onClick={() => onOpen(task)}
                   className="min-w-0 flex-1 text-left"
                 >
-                  <span className="block truncate text-[12.5px] font-medium">
+                  <span className="block truncate text-[12.5px] font-semibold">
                     {task.title}
                   </span>
-                  <span className="mt-[2px] block text-[10.5px] opacity-[0.72]">
-                    {category?.name ?? "미분류"} · {formatDaySlash(task.endDate)}
+                  <span className="mt-[2px] block text-[10.5px] font-semibold">
+                    <span style={{ color: tone.tx }}>{category?.name ?? "미분류"}</span>
+                    <span className="font-medium" style={{ color: "var(--ink-3)" }}>
+                      {" · "}
+                      {formatDaySlash(task.endDate)}
+                    </span>
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onMoveToToday(task)}
-                  className="shrink-0 rounded-full bg-white/70 px-[9px] py-[4px] text-[10.5px] font-medium"
+                  className="shrink-0 rounded-full px-[9px] py-[4px] text-[10.5px] font-semibold"
+                  style={{ background: "var(--line-2)", color: "var(--ink-2)" }}
                 >
                   오늘로
                 </button>

@@ -1,43 +1,85 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────
-   디자인 토큰 · 05-design.md 2장
-   원칙: 색은 카테고리에만 쓴다. UI 크롬은 무채색.
+   디자인 토큰 · docs/mockups/themes.html
+   시안 A(라이트) + 시안 C(다크)
+
+   두 테마는 같은 구조에 배경만 뒤집은 것이다.
+   카드는 무채색, 색은 좌측 띠·라벨·달력 점에만 —
+   규칙이 같아서 변수 값만 갈아끼우면 한 벌로 관리된다.
    ────────────────────────────────────────────── */
 
-:root {
+:root,
+:root[data-theme="light"] {
   /* ── 중립 (UI 크롬) ── */
-  --ink: #1c1f23;
-  --ink-2: #5b6169;
-  --ink-3: #8f959d;
-  --line: #e6e8eb;
-  --line-2: #f0f1f3;
+  --ink: #141414;
+  --ink-2: #55595f;
+  --ink-3: #8b9097;
+  --line: #e4e6e9;
+  --line-2: #f1f2f4;
   --surface: #ffffff;
-  --danger: #a8564f;
+  --card: #ffffff;
+  --card-border: #eceef1;
+  --card-shadow: 0 1px 2px rgba(20, 20, 20, 0.05);
+  --danger: #c21620;
+  --dim: #c8ccd1; /* 이전/다음 달 날짜 */
 
   /* ── 미분류 (팔레트 아님) ── */
-  --none-bg: #f2f3f4;
-  --none-tx: #5b6169;
+  --none-bg: #f1f2f4;
+  --none-tx: #6b7076;
   --none-dt: #9aa0a6;
 
-  /* ── 카테고리 팔레트 12색 × 3톤 ──
-     -bg 카드 배경 / -tx 텍스트 / -dt 점·막대 */
-  --sage-bg: #edf2e9;     --sage-tx: #3f5334;     --sage-dt: #6e8f57;
-  --rose-bg: #f7eaec;     --rose-tx: #6b3a42;     --rose-dt: #a96f7b;
-  --mist-bg: #e8f0f5;     --mist-tx: #2f4a5c;     --mist-dt: #5e88a2;
-  --lavender-bg: #efebf5; --lavender-tx: #473f5c; --lavender-dt: #7c6fa2;
-  --clay-bg: #f7ebe4;     --clay-tx: #6b4632;     --clay-dt: #a87356;
-  --mustard-bg: #f5efdf;  --mustard-tx: #5e4c22;  --mustard-dt: #997e38;
-  --olive-bg: #f0f1e3;    --olive-tx: #4c5230;    --olive-dt: #7b8349;
-  --teal-bg: #e4f0ef;     --teal-tx: #2c4e4c;     --teal-dt: #558c88;
-  --plum-bg: #f3eaf1;     --plum-tx: #573c52;     --plum-dt: #8e6885;
-  --sand-bg: #f4efe7;     --sand-tx: #5c4e3a;     --sand-dt: #93805f;
-  --slate-bg: #eaedf3;    --slate-tx: #3a4459;    --slate-dt: #67738f;
-  --coral-bg: #f9eae7;    --coral-tx: #6e3f36;    --coral-dt: #af6e5e;
+  /* ── 비비드 9색 ──
+     bg 옅은 배경 / tx 라벨 텍스트 / dt 원색
+     tx는 배경 위 4.5:1을 넘도록 조정한 값이다.
+     원색을 그대로 글자에 쓰면 노랑 1.3:1, 주황 2.2:1로 읽히지 않는다. */
+  --red-bg: #fdecec;    --red-tx: #c21620;    --red-dt: #e1232b;
+  --orange-bg: #fdf0e2; --orange-tx: #a65a00; --orange-dt: #ef8b22;
+  --yellow-bg: #fbf6d8; --yellow-tx: #7e6b00; --yellow-dt: #f0d426;
+  --green-bg: #e4f5ec;  --green-tx: #007a42;  --green-dt: #00a65a;
+  --blue-bg: #e8f2fc;   --blue-tx: #1565b0;   --blue-dt: #4ca0e5;
+  --pink-bg: #fce6f3;   --pink-tx: #b8007a;   --pink-dt: #e10096;
+  --purple-bg: #f0e8f6; --purple-tx: #6b3590; --purple-dt: #7c40a2;
+  --brown-bg: #f2eae4;  --brown-tx: #6a3410;  --brown-dt: #8a4a1c;
+  --ink-bg: #eeeff1;    --ink-tx: #141414;    --ink-dt: #141414;
 
-  /* ── 모션 (05-design 6.1) ── */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-check: 250ms;
+
+  color-scheme: light;
+}
+
+/* ── 다크 (시안 C · 블랙 캔버스) ──
+   어두운 판 위에서는 원색이 발광하듯 살아나므로,
+   라벨에 어둡게 조정한 톤이 아니라 밝은 원색 계열을 그대로 쓴다. */
+:root[data-theme="dark"] {
+  --ink: #f2f3f5;
+  --ink-2: #a7adb6;
+  --ink-3: #7c828b;
+  --line: #23252a;
+  --line-2: #1c1e23;
+  --surface: #0d0d0f;
+  --card: #17181c;
+  --card-border: #23252a;
+  --card-shadow: none;
+  --danger: #ff6b6b;
+  --dim: #4a4f57;
+
+  --none-bg: #1f2126;
+  --none-tx: #9aa0a6;
+  --none-dt: #6b7076;
+
+  --red-bg: #2a1518;    --red-tx: #ff6b6b;    --red-dt: #ff4d55;
+  --orange-bg: #2a1d10; --orange-tx: #f2a24e; --orange-dt: #f59b3c;
+  --yellow-bg: #29250f; --yellow-tx: #e8cf4e; --yellow-dt: #f0d426;
+  --green-bg: #10241a;  --green-tx: #3ecb86;  --green-dt: #22b96d;
+  --blue-bg: #10202e;   --blue-tx: #6fb6f0;   --blue-dt: #59a9ea;
+  --pink-bg: #2a1022;   --pink-tx: #f45cb8;   --pink-dt: #ee2aa5;
+  --purple-bg: #1f1429; --purple-tx: #a97fd0; --purple-dt: #9260be;
+  --brown-bg: #241a12;  --brown-tx: #c08b5e;  --brown-dt: #b0724a;
+  --ink-bg: #1f2126;    --ink-tx: #d2d6dc;    --ink-dt: #c3c8cf;
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -47,6 +89,7 @@
   --color-line: var(--line);
   --color-line-2: var(--line-2);
   --color-surface: var(--surface);
+  --color-card: var(--card);
   --color-danger: var(--danger);
 
   --radius-card: 12px;
@@ -61,6 +104,7 @@
 /* 웹폰트를 로드하지 않는다 — 첫 렌더 지연을 만들지 않기 위해 (05-design 3.1) */
 html {
   -webkit-text-size-adjust: 100%;
+  background: var(--surface);
 }
 
 body {

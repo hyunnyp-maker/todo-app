@@ -5,7 +5,7 @@
  * 파싱 실패·스키마 불일치 시 흰 화면 대신 초기 상태로 복구한다.
  */
 
-import { isPaletteKey } from "@/domain/palette";
+import { normalizePaletteKey } from "@/domain/palette";
 import type { Category, GuestData, Task } from "@/domain/types";
 import { seedGuestData } from "./seed";
 
@@ -23,11 +23,13 @@ function parseCategory(v: unknown): Category | null {
   const { id, name, color, sortOrder } = v;
   if (typeof id !== "string" || id === "") return null;
   if (typeof name !== "string") return null;
-  if (!isPaletteKey(color)) return null;
+  // 파스텔 시절 키(sage·mist·clay…)는 새 비비드 키로 조용히 갈아끼운다
+  const normalized = normalizePaletteKey(color);
+  if (!normalized) return null;
   return {
     id,
     name,
-    color,
+    color: normalized,
     sortOrder: typeof sortOrder === "number" ? sortOrder : 0,
   };
 }

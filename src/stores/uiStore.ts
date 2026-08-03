@@ -10,7 +10,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { monthOf } from "@/domain/date";
-import type { ISODate, ISOMonth } from "@/domain/types";
+import type { ISODate, ISOMonth, ThemeMode } from "@/domain/types";
 
 interface UiState {
   selectedDate: ISODate | null;
@@ -19,6 +19,8 @@ interface UiState {
   hiddenCategoryIds: string[];
   hideCompleted: boolean;
   overdueOpen: boolean;
+  theme: ThemeMode;
+  setTheme: (mode: ThemeMode) => void;
 
   selectDate: (date: ISODate) => void;
   goToMonth: (month: ISOMonth) => void;
@@ -27,6 +29,24 @@ interface UiState {
   toggleCategory: (id: string) => void;
   setHideCompleted: (v: boolean) => void;
   toggleOverdue: () => void;
+}
+
+/**
+ * 테마를 문서에 반영한다.
+ *
+ * 첫 페인트 전에는 layout.tsx의 인라인 스크립트가 같은 일을 한다 —
+ * React가 붙기를 기다리면 흰 화면이 한 번 번쩍인다.
+ * 여기서는 사용자가 설정에서 바꿨을 때만 호출된다.
+ */
+export function applyTheme(mode: ThemeMode) {
+  if (typeof document === "undefined") return;
+  const resolved =
+    mode === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : mode;
+  document.documentElement.dataset.theme = resolved;
 }
 
 export const useUiStore = create<UiState>()(
@@ -39,6 +59,12 @@ export const useUiStore = create<UiState>()(
       // 완료 항목이 사라지면 "오늘 뭐 했지"에 답할 게 없어진다 (P7)
       hideCompleted: false,
       overdueOpen: false,
+      theme: "system",
+
+      setTheme: (mode) => {
+        set({ theme: mode });
+        applyTheme(mode);
+      },
 
       // 날짜를 고르면 보이는 달도 따라간다 (다른 달 칸을 탭한 경우)
       selectDate: (date) =>
@@ -67,6 +93,7 @@ export const useUiStore = create<UiState>()(
       partialize: (s) => ({
         hiddenCategoryIds: s.hiddenCategoryIds,
         hideCompleted: s.hideCompleted,
+        theme: s.theme,
       }),
     },
   ),

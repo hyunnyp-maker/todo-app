@@ -1,58 +1,107 @@
 /**
- * 팔레트 — 05-design.md 2.2
+ * 팔레트 — 비비드 9색 (docs/mockups/themes.html)
  *
- * 각 색은 배경 / 텍스트 / 마크 3단계 세트다.
- * hex는 globals.css의 CSS 변수가 진실의 원천이고, 여기서는 var() 참조만 만든다.
- * 색을 바꿀 때 CSS 한 곳만 고치면 되도록.
+ * 파스텔에서 원색으로 바꾼 이유: 파스텔은 카드 배경이 전부 명도 92~96% 구간에 몰려
+ * 색상만 다르고 밝기가 같았다. 눈은 그것을 "다른 것"이 아니라 "같은 것"으로 읽는다.
+ *
+ * 각 색은 세 값을 갖는다.
+ *   dt  원색 — 좌측 띠 · 달력 점 · 기간 막대
+ *   tx  라벨 텍스트 — 배경 위에서 4.5:1을 넘도록 조정한 값
+ *   bg  옅은 배경 — 칩 등 좁은 면적
+ *
+ * 실제 hex는 globals.css의 CSS 변수가 진실의 원천이고, 여기서는 var() 참조만 만든다.
+ * 라이트/다크 테마는 같은 변수 이름에 다른 값을 넣는 것으로 갈린다.
  */
 
 import type { PaletteKey } from "./types";
 
 export interface ToneSet {
-  /** 카드 배경 */
+  /** 옅은 배경 (칩) */
   bg: string;
-  /** 카드 텍스트 */
+  /** 라벨 텍스트 */
   tx: string;
-  /** 달력 점·기간 막대 */
+  /** 원색 — 좌측 띠 · 점 · 막대 */
   dt: string;
 }
 
 export const PALETTE_KEYS: readonly PaletteKey[] = [
-  "sage",
-  "rose",
-  "mist",
-  "lavender",
-  "clay",
-  "mustard",
-  "olive",
-  "teal",
-  "plum",
-  "sand",
-  "slate",
-  "coral",
+  "blue",
+  "green",
+  "orange",
+  "red",
+  "purple",
+  "pink",
+  "yellow",
+  "brown",
+  "ink",
 ] as const;
 
 export const PALETTE_LABELS: Record<PaletteKey, string> = {
-  sage: "세이지",
-  rose: "더스티 로즈",
-  mist: "미스트 블루",
-  lavender: "라벤더",
-  clay: "클레이",
-  mustard: "머스터드",
-  olive: "올리브",
-  teal: "티일",
-  plum: "플럼",
-  sand: "샌드",
-  slate: "슬레이트",
-  coral: "코랄",
+  red: "레드",
+  orange: "오렌지",
+  yellow: "옐로",
+  green: "그린",
+  blue: "블루",
+  pink: "핑크",
+  purple: "퍼플",
+  brown: "브라운",
+  ink: "블랙",
 };
 
-/** 기본 카테고리 배정 — 색상환에서 서로 멀어 작은 점으로도 구분된다 */
+/** 참고 컬러 차트의 키워드. 색을 고를 때 성격을 함께 보여준다 */
+export const PALETTE_MEANINGS: Record<PaletteKey, string> = {
+  red: "열정 · 긴급",
+  orange: "따뜻함 · 사교",
+  yellow: "창의 · 명랑",
+  green: "회복 · 성장",
+  blue: "신뢰 · 유능",
+  pink: "공감 · 다정",
+  purple: "품격 · 몰입",
+  brown: "듬직 · 실용",
+  ink: "격식 · 집중",
+};
+
+/**
+ * 기본 카테고리 배정 — 차트의 의미를 그대로 따랐다.
+ * 색상환에서 서로 멀어 작은 점으로도 구분된다.
+ */
 export const DEFAULT_CATEGORY_COLORS = {
-  work: "mist",
-  personal: "sage",
-  family: "clay",
+  work: "blue",
+  personal: "green",
+  family: "orange",
 } as const satisfies Record<string, PaletteKey>;
+
+/**
+ * 파스텔 시절의 키를 새 키로 옮긴다.
+ * 이미 저장된 카테고리 색이 사라지면 안 되므로, 읽을 때 조용히 갈아끼운다.
+ */
+const LEGACY_KEYS: Record<string, PaletteKey> = {
+  sage: "green",
+  olive: "green",
+  teal: "blue",
+  mist: "blue",
+  slate: "ink",
+  lavender: "purple",
+  plum: "purple",
+  rose: "pink",
+  coral: "red",
+  clay: "orange",
+  sand: "brown",
+  mustard: "yellow",
+};
+
+export function isPaletteKey(value: unknown): value is PaletteKey {
+  return (
+    typeof value === "string" && (PALETTE_KEYS as readonly string[]).includes(value)
+  );
+}
+
+/** 알 수 없는 값이면 null. 옛 키는 새 키로 바꿔서 돌려준다 */
+export function normalizePaletteKey(value: unknown): PaletteKey | null {
+  if (isPaletteKey(value)) return value;
+  if (typeof value === "string" && value in LEGACY_KEYS) return LEGACY_KEYS[value];
+  return null;
+}
 
 /** 미분류 — 실제 카테고리가 아니므로 팔레트 색을 배정하지 않는다 */
 export const UNCATEGORIZED_TONE: ToneSet = {
@@ -70,23 +119,16 @@ export function toneOf(color: PaletteKey | null | undefined): ToneSet {
   };
 }
 
-export function isPaletteKey(value: unknown): value is PaletteKey {
-  return (
-    typeof value === "string" &&
-    (PALETTE_KEYS as readonly string[]).includes(value)
-  );
-}
-
 /**
- * 아직 안 쓴 색을 먼저 돌려준다 (05-design 5.8).
- * 새 카테고리는 이 목록의 첫 색으로 시작해, 고르지 않아도 예쁘게 시작된다.
+ * 아직 안 쓴 색을 먼저 돌려준다.
+ * 새 카테고리는 이 목록의 첫 색으로 시작해, 고르지 않아도 겹치지 않는다.
  */
 export function unusedColors(used: readonly PaletteKey[]): PaletteKey[] {
   const taken = new Set(used);
   return PALETTE_KEYS.filter((key) => !taken.has(key));
 }
 
-/** 미사용 색 우선, 없으면 사용 중인 색 중 가장 적게 쓰인 것 */
+/** 미사용 색 우선, 없으면 가장 적게 쓰인 색 */
 export function suggestColor(used: readonly PaletteKey[]): PaletteKey {
   const unused = unusedColors(used);
   if (unused.length > 0) return unused[0];

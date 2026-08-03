@@ -68,10 +68,15 @@ export function QuickAddBar({
                   inputRef.current?.focus();
                 }}
                 aria-pressed={on}
-                className="shrink-0 whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-medium"
+                className="shrink-0 overflow-hidden whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
                 style={
                   on
-                    ? { background: tone.bg, color: tone.tx, outline: `1.5px solid ${tone.dt}` }
+                    ? {
+                        background: "var(--line-2)",
+                        color: tone.tx,
+                        boxShadow: `inset 3px 0 0 ${tone.dt}`,
+                        outline: `1.5px solid ${tone.dt}`,
+                      }
                     : { background: "var(--line-2)", color: "var(--ink-3)" }
                 }
               >
@@ -82,8 +87,14 @@ export function QuickAddBar({
         </div>
       )}
 
-      <div className="flex items-center gap-[9px] px-[13px] py-[9px]">
-        <span aria-hidden className="text-[15px] text-ink-3">
+      {/* 입력란이 눈에 안 들어온다는 지적을 받아, 옅은 판 위에 얹고 글자를 굵혔다.
+          하단 바는 이 앱에서 가장 자주 쓰는 곳이라 존재감이 있어야 한다 (E1) */}
+      <div className="px-[11px] py-[8px]">
+        <div
+          className="flex items-center gap-[9px] rounded-[12px] px-[12px] py-[10px]"
+          style={{ background: "var(--line-2)" }}
+        >
+        <span aria-hidden className="text-[15px] font-semibold text-ink-2">
           ✎
         </span>
         <input
@@ -108,17 +119,18 @@ export function QuickAddBar({
           autoCorrect="off"
           spellCheck={false}
           // 글자 크기는 globals.css가 터치 기기에서 16px로 올린다 (iOS 자동 확대 방지)
-          className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-ink-3"
+          className="min-w-0 flex-1 bg-transparent text-[13.5px] font-semibold outline-none placeholder:font-semibold placeholder:text-ink-2"
         />
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onOpenDetail(title.trim())}
           aria-label="자세히 입력"
-          className="px-1 text-[15px] text-ink-3"
+          className="px-1 text-[15px] font-semibold text-ink-2"
         >
           ⋯
         </button>
+        </div>
       </div>
     </div>
   );

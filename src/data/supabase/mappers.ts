@@ -4,7 +4,7 @@
  * 이 경계가 있어서 도메인 타입이 Postgres 컬럼명을 몰라도 된다.
  */
 
-import { isPaletteKey } from "@/domain/palette";
+import { normalizePaletteKey } from "@/domain/palette";
 import type { Category, Task } from "@/domain/types";
 
 export interface CategoryRow {
@@ -32,8 +32,8 @@ export function toCategory(row: CategoryRow): Category {
   return {
     id: row.id,
     name: row.name,
-    // DB에 알 수 없는 색이 들어 있어도 화면이 깨지지 않게 기본값으로 떨어뜨린다
-    color: isPaletteKey(row.color) ? row.color : "slate",
+    // 옛 파스텔 키는 새 키로 옮기고, 알 수 없는 값이면 화면이 깨지지 않게 기본값으로
+    color: normalizePaletteKey(row.color) ?? "ink",
     sortOrder: row.sort_order,
   };
 }

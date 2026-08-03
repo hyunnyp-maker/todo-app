@@ -242,11 +242,16 @@ export function CategoryBand({
             onDoubleClick={() => onEdit(c)}
             aria-pressed={!off}
             title="탭: 필터 · 끌기: 순서 이동 · 길게 누르기: 편집"
-            className="shrink-0 select-none whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-medium"
+            className="shrink-0 select-none overflow-hidden whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
             style={{
+              // 칩도 카드와 같은 규칙 — 색은 좌측 띠와 글자에만
               ...(off
                 ? { background: "var(--line-2)", color: "var(--ink-3)" }
-                : { background: tone.bg, color: tone.tx }),
+                : {
+                    background: "var(--line-2)",
+                    color: tone.tx,
+                    boxShadow: `inset 3px 0 0 ${tone.dt}`,
+                  }),
               cursor: dragging ? "grabbing" : "grab",
               transform: dragging ? "scale(1.08)" : undefined,
               boxShadow: dragging ? "0 4px 12px rgba(0,0,0,0.18)" : undefined,
@@ -267,11 +272,15 @@ export function CategoryBand({
           type="button"
           onClick={() => onToggle(UNCATEGORIZED_ID)}
           aria-pressed={!hidden.has(UNCATEGORIZED_ID)}
-          className="shrink-0 whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-medium"
+          className="shrink-0 whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
           style={
             hidden.has(UNCATEGORIZED_ID)
               ? { background: "var(--line-2)", color: "var(--ink-3)" }
-              : { background: toneOf(null).bg, color: toneOf(null).tx }
+              : {
+                  background: "var(--line-2)",
+                  color: toneOf(null).tx,
+                  boxShadow: `inset 3px 0 0 ${toneOf(null).dt}`,
+                }
           }
         >
           {UNCATEGORIZED_NAME}

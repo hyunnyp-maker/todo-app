@@ -81,10 +81,15 @@ export function TaskEditSheet({
               type="button"
               onClick={() => setDraft((d) => ({ ...d, categoryId: c.id }))}
               aria-pressed={on}
-              className="rounded-full px-[10px] py-[5px] text-[11.5px] font-medium"
+              className="overflow-hidden rounded-full px-[10px] py-[5px] text-[11.5px] font-semibold"
               style={
                 on
-                  ? { background: tone.bg, color: tone.tx, outline: `1.5px solid ${tone.dt}` }
+                  ? {
+                      background: "var(--line-2)",
+                      color: tone.tx,
+                      boxShadow: `inset 3px 0 0 ${tone.dt}`,
+                      outline: `1.5px solid ${tone.dt}`,
+                    }
                   : { background: "var(--line-2)", color: "var(--ink-3)" }
               }
             >
@@ -96,12 +101,13 @@ export function TaskEditSheet({
           type="button"
           onClick={() => setDraft((d) => ({ ...d, categoryId: null }))}
           aria-pressed={draft.categoryId === null}
-          className="rounded-full px-[10px] py-[5px] text-[11.5px] font-medium"
+          className="overflow-hidden rounded-full px-[10px] py-[5px] text-[11.5px] font-semibold"
           style={
             draft.categoryId === null
               ? {
-                  background: toneOf(null).bg,
+                  background: "var(--line-2)",
                   color: toneOf(null).tx,
+                  boxShadow: "inset 3px 0 0 var(--none-dt)",
                   outline: "1.5px solid var(--none-dt)",
                 }
               : { background: "var(--line-2)", color: "var(--ink-3)" }

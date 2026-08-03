@@ -32,9 +32,9 @@ function task(over: Partial<Task> = {}): Task {
 }
 
 const categories: Category[] = [
-  { id: "work", name: "직장", color: "mist", sortOrder: 0 },
-  { id: "personal", name: "개인", color: "sage", sortOrder: 1 },
-  { id: "family", name: "가족", color: "clay", sortOrder: 2 },
+  { id: "work", name: "직장", color: "blue", sortOrder: 0 },
+  { id: "personal", name: "개인", color: "green", sortOrder: 1 },
+  { id: "family", name: "가족", color: "orange", sortOrder: 2 },
 ];
 
 describe("완료 판정", () => {

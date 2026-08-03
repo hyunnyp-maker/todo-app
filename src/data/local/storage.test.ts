@@ -4,7 +4,7 @@ import type { GuestData } from "@/domain/types";
 
 const valid: GuestData = {
   schemaVersion: 1,
-  categories: [{ id: "c1", name: "직장", color: "mist", sortOrder: 0 }],
+  categories: [{ id: "c1", name: "직장", color: "blue", sortOrder: 0 }],
   tasks: [
     {
       id: "t1",
@@ -42,9 +42,9 @@ describe("손상 복구", () => {
     const raw = JSON.stringify({
       ...valid,
       categories: [
-        { id: "c1", name: "직장", color: "mist", sortOrder: 0 },
+        { id: "c1", name: "직장", color: "blue", sortOrder: 0 },
         { id: "c2", name: "이상한색", color: "형광핑크", sortOrder: 1 },
-        { name: "id 없음", color: "sage", sortOrder: 2 },
+        { name: "id 없음", color: "green", sortOrder: 2 },
       ],
       tasks: [
         valid.tasks[0],
@@ -55,6 +55,14 @@ describe("손상 복구", () => {
     const parsed = parseGuestData(raw)!;
     expect(parsed.categories.map((c) => c.id)).toEqual(["c1"]);
     expect(parsed.tasks.map((t) => t.id)).toEqual(["t1"]);
+  });
+
+  it("파스텔 시절에 저장된 색은 새 키로 옮겨 읽는다", () => {
+    const raw = JSON.stringify({
+      ...valid,
+      categories: [{ id: "c1", name: "직장", color: "mist", sortOrder: 0 }],
+    });
+    expect(parseGuestData(raw)!.categories[0].color).toBe("blue");
   });
 
   it("사라진 카테고리를 가리키는 할일은 미분류가 된다", () => {

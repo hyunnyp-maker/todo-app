@@ -4,13 +4,22 @@ import Link from "next/link";
 import { Brand } from "@/components/Brand";
 import { Sheet } from "@/components/ui/Sheet";
 import { getSupabaseClient } from "@/data/supabase/client";
+import type { ThemeMode } from "@/domain/types";
 import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
+
+const THEMES: { mode: ThemeMode; label: string; hint: string }[] = [
+  { mode: "light", label: "라이트", hint: "밝은 배경" },
+  { mode: "dark", label: "다크", hint: "어두운 배경" },
+  { mode: "system", label: "시스템", hint: "기기 설정" },
+];
 
 interface Props {
   open: boolean;
   hideCompleted: boolean;
   onHideCompletedChange: (v: boolean) => void;
+  theme: ThemeMode;
+  onThemeChange: (mode: ThemeMode) => void;
   onClose: () => void;
 }
 
@@ -18,6 +27,8 @@ export function SettingsSheet({
   open,
   hideCompleted,
   onHideCompletedChange,
+  theme,
+  onThemeChange,
   onClose,
 }: Props) {
   const { user, isConfigured } = useSession();
@@ -37,6 +48,35 @@ export function SettingsSheet({
 
   return (
     <Sheet open={open} title="설정" onClose={onClose}>
+      <p className="mb-[6px] text-[11px] text-ink-3">화면 테마</p>
+      <div className="mb-[14px] grid grid-cols-3 gap-[6px]">
+        {THEMES.map((t) => {
+          const on = t.mode === theme;
+          return (
+            <button
+              key={t.mode}
+              type="button"
+              onClick={() => onThemeChange(t.mode)}
+              aria-pressed={on}
+              className="rounded-[10px] border px-[8px] py-[9px] text-center transition-colors"
+              style={{
+                background: on ? "var(--ink)" : "var(--line-2)",
+                borderColor: on ? "var(--ink)" : "transparent",
+                color: on ? "var(--surface)" : "var(--ink-2)",
+              }}
+            >
+              <span className="block text-[12.5px] font-semibold">{t.label}</span>
+              <span
+                className="mt-[1px] block text-[10px]"
+                style={{ color: on ? "var(--surface)" : "var(--ink-3)", opacity: on ? 0.7 : 1 }}
+              >
+                {t.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       <button
         type="button"
         role="switch"

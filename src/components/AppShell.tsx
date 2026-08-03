@@ -50,6 +50,8 @@ export function AppShell() {
   const setHideCompleted = useUiStore((s) => s.setHideCompleted);
   const overdueOpen = useUiStore((s) => s.overdueOpen);
   const toggleOverdue = useUiStore((s) => s.toggleOverdue);
+  const theme = useUiStore((s) => s.theme);
+  const setTheme = useUiStore((s) => s.setTheme);
 
   const today = useToday();
 
@@ -384,6 +386,8 @@ export function AppShell() {
         open={settingsOpen}
         hideCompleted={hideCompleted}
         onHideCompletedChange={setHideCompleted}
+        theme={theme}
+        onThemeChange={setTheme}
         onClose={() => setSettingsOpen(false)}
       />
 

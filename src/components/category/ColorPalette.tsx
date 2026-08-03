@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { PALETTE_KEYS, PALETTE_LABELS, toneOf } from "@/domain/palette";
+import {
+  PALETTE_KEYS,
+  PALETTE_LABELS,
+  PALETTE_MEANINGS,
+  toneOf,
+} from "@/domain/palette";
 import type { PaletteKey } from "@/domain/types";
 
 interface Props {
@@ -15,7 +20,7 @@ interface Props {
  * 팔레트 — E4. 색 고르기가 이 앱의 즐거움이다.
  *
  * 자유 컬러피커를 두지 않는다 (P9). 선택 부담이 늘고 못생긴 색이 나온다.
- * 아직 안 쓴 색을 앞에 놓아, 위에서부터 고르면 자연히 겹치지 않는다.
+ * 대신 참고 컬러 차트의 9색만 두고, 각 색의 성격(신뢰·회복·따뜻함…)을 함께 보여준다.
  */
 export function ColorPalette({ value, used, onChange }: Props) {
   // 정렬 순서와 '사용 중' 표시를 열린 시점에 고정한다.
@@ -37,38 +42,56 @@ export function ColorPalette({ value, used, onChange }: Props) {
   const { taken, ordered } = frozen;
 
   return (
-    <div className="grid grid-cols-6 gap-[8px]">
+    <div className="grid grid-cols-3 gap-[8px]">
       {ordered.map((key) => {
         const tone = toneOf(key);
         const selected = key === value;
+        const inUse = taken.has(key) && !selected;
         return (
           <button
             key={key}
             type="button"
             onClick={() => onChange(key)}
-            aria-label={`${PALETTE_LABELS[key]}${taken.has(key) && !selected ? " (사용 중)" : ""}`}
+            aria-label={`${PALETTE_LABELS[key]} — ${PALETTE_MEANINGS[key]}${
+              inUse ? " (사용 중)" : ""
+            }`}
             aria-pressed={selected}
-            className="relative flex h-[44px] items-center justify-center rounded-[10px]"
+            className="flex flex-col items-start gap-[5px] rounded-[10px] border px-[9px] py-[8px] text-left transition-colors"
             style={{
-              background: tone.bg,
-              outline: selected ? `2px solid ${tone.dt}` : "none",
-              outlineOffset: "-2px",
+              background: selected ? tone.bg : "var(--line-2)",
+              borderColor: selected ? tone.dt : "transparent",
+              borderWidth: selected ? 2 : 1,
             }}
           >
-            <span
-              aria-hidden
-              className="size-[12px] rounded-full"
-              style={{ background: tone.dt }}
-            />
-            {taken.has(key) && !selected && (
+            <span className="flex w-full items-center gap-[6px]">
+              {/* 원색 그대로 — 이 색이 카드 좌측 띠와 달력 점에 쓰인다 */}
               <span
                 aria-hidden
-                className="absolute bottom-[4px] text-[8px] leading-none"
-                style={{ color: tone.tx, opacity: 0.5 }}
+                className="h-[14px] w-[5px] shrink-0 rounded-[2px]"
+                style={{ background: tone.dt }}
+              />
+              <span
+                className="truncate text-[11.5px] font-semibold"
+                style={{ color: selected ? tone.tx : "var(--ink-2)" }}
               >
-                ●
+                {PALETTE_LABELS[key]}
               </span>
-            )}
+              {inUse && (
+                <span
+                  aria-hidden
+                  className="ml-auto text-[8px] leading-none"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  ●
+                </span>
+              )}
+            </span>
+            <span
+              className="truncate text-[9.5px] leading-none"
+              style={{ color: "var(--ink-3)" }}
+            >
+              {PALETTE_MEANINGS[key]}
+            </span>
           </button>
         );
       })}

@@ -88,13 +88,21 @@ export function TaskCard({
             setOffset(0);
           }
         }}
-        className="relative flex min-h-[62px] items-start gap-[9px] rounded-card px-3 py-[10px]"
+        className="relative flex min-h-[62px] items-start gap-[10px] rounded-card border py-[11px] pl-3 pr-3"
         style={{
-          background: tone.bg,
-          color: tone.tx,
-          opacity: done ? 0.62 : 1,
+          // 카드는 무채색으로 두고 색은 좌측 6px 띠에만 쓴다.
+          // 색 면적을 좁히면 원색을 써도 시끄럽지 않고, 시선은 제목에 먼저 간다
+          background: "var(--card)",
+          borderColor: "var(--card-border)",
+          borderLeft: `6px solid ${tone.dt}`,
+          boxShadow: "var(--card-shadow)",
+          color: "var(--ink)",
+          opacity: done ? 0.55 : 1,
           transform: `translateX(${offset}px)`,
-          transition: offset === 0 ? "transform 180ms var(--ease), opacity 250ms var(--ease)" : undefined,
+          transition:
+            offset === 0
+              ? "transform 180ms var(--ease), opacity 250ms var(--ease)"
+              : undefined,
         }}
       >
         <button
@@ -106,11 +114,11 @@ export function TaskCard({
             e.stopPropagation();
             handleToggle();
           }}
-          className="relative mt-[1px] flex size-[16px] shrink-0 items-center justify-center rounded-check border-[1.6px] border-current"
+          className="relative mt-[1px] flex size-[17px] shrink-0 items-center justify-center rounded-check border-2"
           style={{
-            background: done ? "currentColor" : "transparent",
-            opacity: done ? 0.85 : 0.5,
-            transition: "background 160ms var(--ease), opacity 160ms var(--ease)",
+            borderColor: done ? tone.dt : "var(--ink-3)",
+            background: done ? tone.dt : "transparent",
+            transition: "background 160ms var(--ease), border-color 160ms var(--ease)",
           }}
         >
           {spreadKey > 0 && (
@@ -124,20 +132,25 @@ export function TaskCard({
         </button>
 
         <div className="min-w-0 flex-1">
+          {/* 제목이 화면에서 가장 진하다 — 시선이 할일 이름에 먼저 꽂혀야 한다 */}
           <div
-            className="text-[13.5px] font-medium leading-[1.35]"
+            className="text-[13.5px] font-semibold leading-[1.35]"
             style={{
               textDecoration: done ? "line-through" : undefined,
-              opacity: done ? 0.5 : 1,
+              opacity: done ? 0.6 : 1,
               transition: "opacity 250ms var(--ease)",
             }}
           >
             {task.title}
           </div>
           {/* 카테고리 이름은 항상 노출한다 — 색만으로 구분하지 않기 위해 (요구사항 6.2) */}
-          <div className="mt-[3px] flex flex-wrap gap-[7px] text-[10.5px] opacity-[0.72]">
-            <span>{categoryName}</span>
-            {detail && <span>{detail}</span>}
+          <div className="mt-[3px] flex flex-wrap gap-[8px] text-[10.5px] font-semibold">
+            <span style={{ color: tone.tx }}>{categoryName}</span>
+            {detail && (
+              <span className="font-medium" style={{ color: "var(--ink-3)" }}>
+                {detail}
+              </span>
+            )}
           </div>
         </div>
       </div>
