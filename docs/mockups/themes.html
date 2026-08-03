@@ -3,232 +3,281 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Myquence — 테마 시안 비교</title>
+<title>Myquence — 비비드 테마 시안</title>
 <style>
 :root{
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
           "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-  --page-ink:#1c1f23; --page-ink2:#5b6169; --page-ink3:#8f959d;
-  --page-line:#e6e8eb; --page-bg:#f5f6f7;
+  --ink:#141414; --ink2:#55595f; --ink3:#8b9097;
+  --line:#e4e6e9; --page:#f4f5f6;
+
+  /* ── 참고 차트에서 뽑은 비비드 9색 ──
+     dot  = 원색 그대로 (점·막대·좌측 바)
+     text = 흰 배경에서 4.5:1을 넘도록 어둡게 조정한 값
+     tint = 아주 옅은 배경 (필요할 때만)
+     on   = 그 색 위에 얹는 글자색 */
+  --red-dot:#E1232B;    --red-text:#C21620;    --red-tint:#FDECEC;    --red-on:#fff;
+  --orange-dot:#EF8B22; --orange-text:#A65A00; --orange-tint:#FDF0E2; --orange-on:#141414;
+  --yellow-dot:#F0D426; --yellow-text:#7E6B00; --yellow-tint:#FBF6D8; --yellow-on:#141414;
+  --green-dot:#00A65A;  --green-text:#007A42;  --green-tint:#E4F5EC;  --green-on:#fff;
+  --blue-dot:#4CA0E5;   --blue-text:#1565B0;   --blue-tint:#E8F2FC;   --blue-on:#fff;
+  --pink-dot:#E10096;   --pink-text:#B8007A;   --pink-tint:#FCE6F3;   --pink-on:#fff;
+  --purple-dot:#7C40A2; --purple-text:#6B3590; --purple-tint:#F0E8F6; --purple-on:#fff;
+  --brown-dot:#6A3410;  --brown-text:#6A3410;  --brown-tint:#F2EAE4;  --brown-on:#fff;
+  --black-dot:#141414;  --black-text:#141414;  --black-tint:#EFEFEF;  --black-on:#fff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);background:var(--page-bg);color:var(--page-ink);
+body{font-family:var(--font);background:var(--page);color:var(--ink);
      line-height:1.55;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1400px;margin:0 auto;padding:40px 20px 90px}
-h1{font-size:26px;font-weight:700;letter-spacing:-.02em}
-.sub{color:var(--page-ink2);font-size:14px;margin-top:8px;max-width:760px}
+h1{font-size:27px;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--ink2);font-size:14px;margin-top:8px;max-width:800px}
 h2{font-size:19px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em}
-.hr{height:1px;background:var(--page-line);margin:40px 0 26px}
-.note{background:#fff;border:1px solid var(--page-line);border-left:3px solid var(--page-ink);
-      border-radius:0 10px 10px 0;padding:14px 16px;font-size:13px;color:var(--page-ink2);margin-top:18px}
-.note b{color:var(--page-ink)}
+h3{font-size:15px;font-weight:700;margin:26px 0 8px}
+.hr{height:1px;background:var(--line);margin:40px 0 26px}
+.note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ink);
+      border-radius:0 10px 10px 0;padding:15px 17px;font-size:13.5px;color:var(--ink2);margin-top:18px}
+.note b{color:var(--ink)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:22px}
-.opt{background:#fff;border:1px solid var(--page-line);border-radius:18px;padding:20px;display:flex;flex-direction:column}
-.tag{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--page-ink3);margin-bottom:6px}
-.philo{font-size:13px;color:var(--page-ink2);margin:6px 0 14px;min-height:56px}
-.pro{font-size:12.5px;color:var(--page-ink2);margin-top:14px}
-.pro b{color:var(--page-ink);font-weight:600}
+/* ── 팔레트 ─────────────────────────────── */
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px}
+.chip{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.chip-top{padding:14px 14px 12px}
+.chip-name{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.chip-mean{font-size:11px;margin-top:5px;opacity:.88;line-height:1.5}
+.chip-bot{display:flex;font-size:9.5px;font-family:ui-monospace,monospace;color:var(--ink3);
+          border-top:1px solid var(--line)}
+.chip-bot div{flex:1;padding:5px 4px;text-align:center}
+.chip-bot div+div{border-left:1px solid var(--line)}
+.tone{display:flex;height:18px}
+.tone span{flex:1}
+
+/* ── 시안 그리드 ────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:24px;margin-top:22px}
+.opt{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink3);margin-bottom:6px}
+.philo{font-size:13px;color:var(--ink2);margin:6px 0 14px;min-height:58px}
+.pro{font-size:12.5px;color:var(--ink2);margin-top:14px}
+.pro b{color:var(--ink);font-weight:600}
 .pro ul{margin:5px 0 0 16px}.pro li{margin:3px 0}
-.neg{color:#a8564f}
+.neg{color:#C21620}
 
 /* ── 폰 프레임 ─────────────────────────── */
-.phone{width:100%;max-width:320px;margin:0 auto;height:560px;border:8px solid #21252b;
+.phone{width:100%;max-width:322px;margin:0 auto;height:566px;border:8px solid #21252b;
        border-radius:32px;overflow:hidden;display:flex;flex-direction:column;font-size:13px}
-.hd{padding:10px 14px 4px;flex:0 0 auto}
-.brand{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
-.month{font-size:17px;font-weight:700;letter-spacing:-.01em;margin-top:1px}
-.band{display:flex;gap:6px;padding:8px 13px 9px;flex:0 0 auto}
-.chip{font-size:11px;padding:4px 10px;border-radius:999px;white-space:nowrap;font-weight:500}
+.hd{padding:11px 14px 4px;flex:0 0 auto}
+.brand{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+.month{font-size:18px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
+.band{display:flex;gap:6px;padding:9px 13px 10px;flex:0 0 auto}
+.cchip{font-size:11px;padding:4px 11px;border-radius:999px;white-space:nowrap;font-weight:600}
 .cal{padding:0 10px;flex:0 0 auto}
-.dow{display:grid;grid-template-columns:repeat(7,1fr);font-size:9.5px;text-align:center;padding-bottom:2px}
-.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
-.cell{height:32px;display:flex;flex-direction:column;align-items:center;padding-top:4px;
+.dow{display:grid;grid-template-columns:repeat(7,1fr);font-size:9.5px;text-align:center;padding-bottom:3px;font-weight:600}
+.g7{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cell{height:33px;display:flex;flex-direction:column;align-items:center;padding-top:4px;
       border-radius:8px;font-size:11px;line-height:1}
-.dots{display:flex;gap:2px;margin-top:4px;height:5px;align-items:center}
-.dots i{width:4.5px;height:4.5px;border-radius:50%}
-.bar{height:4px;border-radius:2px;width:80%}
-.sect{padding:11px 14px 6px;font-size:10.5px;display:flex;justify-content:space-between;flex:0 0 auto}
+.dots{display:flex;gap:2.5px;margin-top:4px;height:5px;align-items:center}
+.dots i{width:5px;height:5px;border-radius:50%}
+.bar{height:4.5px;border-radius:2px;width:82%;margin-top:4px}
+.sect{padding:12px 14px 6px;font-size:10.5px;display:flex;justify-content:space-between;flex:0 0 auto;font-weight:600}
 .list{flex:1 1 auto;padding:0 11px;overflow:hidden}
-.item{border-radius:12px;padding:10px 12px;margin-bottom:7px;display:flex;gap:9px;align-items:flex-start}
-.cb{width:16px;height:16px;border-radius:5px;flex:0 0 auto;margin-top:1px}
-.it-t{font-size:13.5px;line-height:1.35}
-.it-m{font-size:10.5px;margin-top:3px;display:flex;gap:7px}
-.inp{margin-top:auto;padding:10px 13px;display:flex;gap:9px;align-items:center;flex:0 0 auto;font-size:13px}
+.item{border-radius:12px;padding:11px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.cb{width:17px;height:17px;border-radius:5px;flex:0 0 auto;margin-top:1px}
+.it-t{font-size:13.5px;line-height:1.35;font-weight:600}
+.it-m{font-size:10.5px;margin-top:3px;display:flex;gap:8px;font-weight:600}
+.inp{margin-top:auto;padding:11px 13px;display:flex;gap:9px;align-items:center;flex:0 0 auto;font-size:13px}
 
-/* ══════════════════════════════════════════
-   시안 0 — 현재 (뮤트 파스텔)
-   ══════════════════════════════════════════ */
-.t0{background:#fff;color:#1c1f23}
-.t0 .brand{color:#8f959d}
-.t0 .dow{color:#8f959d}
-.t0 .cell{color:#5b6169}
-.t0 .cell.today{background:#1c1f23;color:#fff;font-weight:700}
-.t0 .sect{color:#8f959d}
-.t0 .inp{border-top:1px solid #e6e8eb;color:#8f959d}
-.t0 .cb{border:1.6px solid currentColor;opacity:.5}
-
-/* ══════════════════════════════════════════
-   시안 A — 잉크 & 액센트
-   흰 카드 · 좌측 컬러 바 · 무채색 위계
-   ══════════════════════════════════════════ */
-.tA{background:#fff;color:#0f1115}
-.tA .brand{color:#9aa0a6}
-.tA .dow{color:#9aa0a6}
+/* ══ 시안 A — 액센트 스트라이프 ══ */
+.tA{background:#fff;color:var(--ink)}
+.tA .brand{color:var(--ink3)}
+.tA .dow{color:var(--ink3)}
 .tA .cell{color:#4a5058}
-.tA .cell.today{background:#0f1115;color:#fff;font-weight:700}
-.tA .sect{color:#9aa0a6}
-.tA .inp{border-top:1px solid #e9ebee;color:#9aa0a6}
-.tA .item{background:#fff;border:1px solid #eceef1;border-left-width:5px;
-          box-shadow:0 1px 2px rgba(15,17,21,.04)}
-.tA .it-t{font-weight:600;color:#0f1115}
-.tA .it-m{color:#9aa0a6}
-.tA .cb{border:1.8px solid #c4c9cf;border-radius:5px}
-.tA .chip{background:#f2f4f6;color:#4a5058}
+.tA .cell.today{background:var(--ink);color:#fff;font-weight:800}
+.tA .sect{color:var(--ink3)}
+.tA .inp{border-top:1px solid var(--line);color:var(--ink3)}
+.tA .item{background:#fff;border:1px solid #eceef1;border-left-width:6px;box-shadow:0 1px 2px rgba(20,20,20,.05)}
+.tA .cb{border:2px solid #c8ccd1;border-radius:5px}
+.tA .cchip{background:#f2f4f6}
 
-/* ══════════════════════════════════════════
-   시안 B — 딥 필
-   진한 채도 카드 · 흰 텍스트
-   ══════════════════════════════════════════ */
-.tB{background:#fbfbfc;color:#16181d}
-.tB .brand{color:#9aa0a6}
-.tB .dow{color:#9aa0a6}
+/* ══ 시안 B — 솔리드 블록 ══ */
+.tB{background:#fafafa;color:var(--ink)}
+.tB .brand{color:var(--ink3)}
+.tB .dow{color:var(--ink3)}
 .tB .cell{color:#4a5058}
-.tB .cell.today{background:#16181d;color:#fff;font-weight:700}
-.tB .sect{color:#8f959d}
-.tB .inp{border-top:1px solid #e6e8eb;color:#8f959d}
-.tB .it-t{font-weight:600;color:#fff}
-.tB .it-m{color:rgba(255,255,255,.72)}
-.tB .cb{border:1.8px solid rgba(255,255,255,.75)}
-.tB .chip{color:#fff;font-weight:600}
+.tB .cell.today{background:var(--ink);color:#fff;font-weight:800}
+.tB .sect{color:var(--ink3)}
+.tB .inp{border-top:1px solid var(--line);color:var(--ink3)}
+.tB .cb{border:2px solid currentColor;opacity:.85;border-radius:5px}
+.tB .cchip{font-weight:700}
 
-/* ══════════════════════════════════════════
-   시안 C — 다크 + 네온 액센트
-   ══════════════════════════════════════════ */
-.tC{background:#0f1114;color:#e8eaed}
-.tC .brand{color:#6b7280}
-.tC .dow{color:#6b7280}
-.tC .cell{color:#9aa1ab}
-.tC .cell.today{background:#e8eaed;color:#0f1114;font-weight:700}
-.tC .sect{color:#6b7280}
-.tC .inp{border-top:1px solid #23262b;color:#6b7280}
-.tC .item{background:#181b20;border-left:5px solid}
-.tC .it-t{font-weight:600;color:#e8eaed}
-.tC .it-m{color:#8b929c}
-.tC .cb{border:1.8px solid #4a5058;border-radius:5px}
-.tC .chip{background:#1d2126;color:#c7ccd3}
+/* ══ 시안 C — 블랙 캔버스 ══ */
+.tC{background:#0d0d0f;color:#f2f3f5}
+.tC .brand{color:#7c828b}
+.tC .dow{color:#7c828b}
+.tC .cell{color:#a7adb6}
+.tC .cell.today{background:#f2f3f5;color:#0d0d0f;font-weight:800}
+.tC .sect{color:#7c828b}
+.tC .inp{border-top:1px solid #23252a;color:#7c828b}
+.tC .item{background:#17181c;border-left:6px solid}
+.tC .it-t{color:#f2f3f5}
+.tC .cb{border:2px solid #4a5058;border-radius:5px}
+.tC .cchip{background:#1c1e23;color:#d2d6dc}
 
 table{border-collapse:collapse;width:100%;font-size:13px;margin-top:16px;background:#fff}
-th,td{border:1px solid var(--page-line);padding:9px 11px;text-align:left;vertical-align:top}
-th{background:#fafbfb;font-weight:600;font-size:12px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#fafbfb;font-weight:700;font-size:12px}
 td:first-child{font-weight:600;width:150px}
-.sw{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.sw span{width:34px;height:34px;border-radius:8px;display:block}
+.ok{color:#007A42;font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>Myquence — 테마 시안 비교</h1>
+<h1>Myquence — 비비드 테마 시안</h1>
 <p class="sub">
-  현재 뮤트 파스텔은 <b>강약이 없다</b>는 지적을 받았다. 원인은 분명하다 —
-  카드 배경이 전부 명도 92~96% 구간에 몰려 있어 <b>카드끼리 밝기 차이가 거의 없다.</b>
-  색상(hue)만 다르고 명도가 같으면 눈은 그것을 "다른 것"이 아니라 "같은 것"으로 읽는다.
-  아래 세 시안은 강약을 만드는 <b>서로 다른 세 가지 방법</b>이다.
+  참고 컬러 차트의 원색 팔레트를 기준으로 다시 만들었다.
+  기존 뮤트 파스텔은 카드 배경이 전부 명도 92~96% 구간에 몰려 있어
+  <b>색상만 다르고 밝기가 같았다</b>. 눈은 그것을 "다른 것"이 아니라 "같은 것"으로 읽는다.
+  비비드 원색은 채도와 명도가 동시에 벌어져 그 문제가 근본적으로 사라진다.
 </p>
 
+<div class="hr"></div>
+
+<h2>1. 팔레트 — 참고 차트 기반 9색</h2>
+<p class="sub">
+  각 색은 <b>점 / 텍스트 / 옅은 배경 / 대비색</b> 네 값을 갖는다.
+  원색을 그대로 글자에 쓰면 흰 배경에서 대비가 부족하다(노랑 1.3:1, 주황 2.2:1).
+  그래서 <b>텍스트용은 어둡게 조정한 별도 값</b>을 둔다 — 전부 WCAG AA(4.5:1)를 넘는다.
+</p>
+
+<div class="pal">
+  <div class="chip">
+    <div class="chip-top" style="background:var(--red-dot);color:var(--red-on)">
+      <div class="chip-name">Red</div>
+      <div class="chip-mean">열정 · 강렬 · 긴급</div>
+    </div>
+    <div class="tone"><span style="background:var(--red-text)"></span><span style="background:var(--red-tint)"></span></div>
+    <div class="chip-bot"><div>E1232B</div><div>C21620</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--orange-dot);color:var(--orange-on)">
+      <div class="chip-name">Orange</div>
+      <div class="chip-mean">자신감 · 따뜻함 · 사교</div>
+    </div>
+    <div class="tone"><span style="background:var(--orange-text)"></span><span style="background:var(--orange-tint)"></span></div>
+    <div class="chip-bot"><div>EF8B22</div><div>A65A00</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--yellow-dot);color:var(--yellow-on)">
+      <div class="chip-name">Yellow</div>
+      <div class="chip-mean">창의 · 명랑 · 활기</div>
+    </div>
+    <div class="tone"><span style="background:var(--yellow-text)"></span><span style="background:var(--yellow-tint)"></span></div>
+    <div class="chip-bot"><div>F0D426</div><div>7E6B00</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--green-dot);color:var(--green-on)">
+      <div class="chip-name">Green</div>
+      <div class="chip-mean">자연 · 회복 · 성장</div>
+    </div>
+    <div class="tone"><span style="background:var(--green-text)"></span><span style="background:var(--green-tint)"></span></div>
+    <div class="chip-bot"><div>00A65A</div><div>007A42</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--blue-dot);color:var(--blue-on)">
+      <div class="chip-name">Blue</div>
+      <div class="chip-mean">신뢰 · 유능 · 침착</div>
+    </div>
+    <div class="tone"><span style="background:var(--blue-text)"></span><span style="background:var(--blue-tint)"></span></div>
+    <div class="chip-bot"><div>4CA0E5</div><div>1565B0</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--pink-dot);color:var(--pink-on)">
+      <div class="chip-name">Pink</div>
+      <div class="chip-mean">공감 · 다정 · 세련</div>
+    </div>
+    <div class="tone"><span style="background:var(--pink-text)"></span><span style="background:var(--pink-tint)"></span></div>
+    <div class="chip-bot"><div>E10096</div><div>B8007A</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--purple-dot);color:var(--purple-on)">
+      <div class="chip-name">Purple</div>
+      <div class="chip-mean">품격 · 야망 · 몰입</div>
+    </div>
+    <div class="tone"><span style="background:var(--purple-text)"></span><span style="background:var(--purple-tint)"></span></div>
+    <div class="chip-bot"><div>7C40A2</div><div>6B3590</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--brown-dot);color:var(--brown-on)">
+      <div class="chip-name">Brown</div>
+      <div class="chip-mean">듬직 · 단순 · 실용</div>
+    </div>
+    <div class="tone"><span style="background:var(--brown-text)"></span><span style="background:var(--brown-tint)"></span></div>
+    <div class="chip-bot"><div>6A3410</div><div>6A3410</div></div>
+  </div>
+  <div class="chip">
+    <div class="chip-top" style="background:var(--black-dot);color:var(--black-on)">
+      <div class="chip-name">Black</div>
+      <div class="chip-mean">격식 · 집중 · 확실</div>
+    </div>
+    <div class="tone"><span style="background:#3a3a3a"></span><span style="background:var(--black-tint)"></span></div>
+    <div class="chip-bot"><div>141414</div><div>141414</div></div>
+  </div>
+</div>
+
 <div class="note">
-<b>강약을 만드는 세 가지 방법</b><br>
-① <b>면적을 줄이고 채도를 올린다</b> — 색을 작게 쓰되 진하게 (시안 A)<br>
-② <b>명도 대비를 뒤집는다</b> — 카드를 어둡게, 글자를 희게 (시안 B)<br>
-③ <b>배경을 어둡게 깐다</b> — 어두운 판 위에서는 같은 색도 훨씬 또렷해진다 (시안 C)
+<b>기본 배정에 의미를 붙였다</b><br>
+직장 = <b>Blue</b> 신뢰·유능 &nbsp;·&nbsp; 개인 = <b>Green</b> 회복·성장 &nbsp;·&nbsp; 가족 = <b>Orange</b> 따뜻함·사교<br>
+색상환에서 서로 멀어 작은 점으로도 구분되고, 각 영역의 성격과도 맞는다.
+<br><br>
+<b>White는 카테고리 색으로 쓰지 않는다.</b> 카드 배경이 이미 흰색이라 구분이 사라진다.
+차트의 White(청결·단순)는 <b>앱 전체의 바탕</b>이 맡는다.
 </div>
 
 <div class="hr"></div>
 
-<div class="grid">
+<h2>2. 시안 3안</h2>
+<p class="sub">같은 팔레트를 <b>얼마나 넓은 면적에 쓰느냐</b>로 갈린다. 색이 진해진 만큼 면적 설계가 훨씬 중요해졌다.</p>
 
-  <!-- ══ 현재 ══ -->
-  <div class="opt">
-    <span class="tag">현재</span>
-    <h2>뮤트 파스텔</h2>
-    <p class="philo">색이 카드 전체를 옅게 덮는다. 눈에 편안하지만 카드 간 밝기 차이가 없어 평평하게 읽힌다.</p>
-    <div class="phone t0">
-      <div class="hd"><div class="brand">Myquence</div><div class="month">2026년 8월</div></div>
-      <div class="band">
-        <span class="chip" style="background:#E8F0F5;color:#2F4A5C">직장</span>
-        <span class="chip" style="background:#EDF2E9;color:#3F5334">개인</span>
-        <span class="chip" style="background:#F7EBE4;color:#6B4632">가족</span>
-      </div>
-      <div class="cal">
-        <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-        <div class="grid7">
-          <div class="cell">26</div><div class="cell">27</div><div class="cell">28</div><div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell">1</div>
-          <div class="cell">2</div>
-          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
-          <div class="cell">4<div class="dots"><i style="background:#5E88A2"></i></div></div>
-          <div class="cell">5<div class="dots"><i style="background:#A87356"></i></div></div>
-          <div class="cell">6</div>
-          <div class="cell">7<div class="bar" style="background:#6E8F57"></div></div>
-          <div class="cell">8<div class="bar" style="background:#6E8F57"></div></div>
-        </div>
-      </div>
-      <div class="sect"><span>8월 3일 · 오늘</span><span>3개</span></div>
-      <div class="list">
-        <div class="item" style="background:#E8F0F5;color:#2F4A5C">
-          <span class="cb"></span><div><div class="it-t">주간보고 초안</div><div class="it-m"><span>직장</span></div></div>
-        </div>
-        <div class="item" style="background:#F7EBE4;color:#6B4632">
-          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div><div class="it-m"><span>가족</span></div></div>
-        </div>
-        <div class="item" style="background:#EDF2E9;color:#3F5334">
-          <span class="cb"></span><div><div class="it-t">30분 걷기</div><div class="it-m"><span>개인</span><span>12/31일</span></div></div>
-        </div>
-      </div>
-      <div class="inp"><span>✎</span><span>할일 추가…</span></div>
-    </div>
-    <div class="pro">
-      <b>약점</b>
-      <ul><li class="neg">카드 세 장의 밝기가 같아 <b>시선이 어디에도 멈추지 않는다</b></li>
-      <li class="neg">제목과 카테고리 이름의 대비도 약해 위계가 흐림</li></ul>
-    </div>
-  </div>
+<div class="grid">
 
   <!-- ══ A ══ -->
   <div class="opt">
     <span class="tag">시안 A · 추천</span>
-    <h2>잉크 &amp; 액센트</h2>
-    <p class="philo">카드는 흰색으로 통일하고, 색은 좌측 5px 띠와 달력 점에만 진하게 쓴다. 강약은 색이 아니라 <b>글자 굵기와 무채색 명도</b>가 만든다.</p>
+    <h2>액센트 스트라이프</h2>
+    <p class="philo">카드는 흰색, 색은 <b>좌측 6px 띠와 라벨·달력 점에만</b>. 원색을 좁은 면적에 몰아넣어 강렬함은 살리고 피로는 피한다.</p>
     <div class="phone tA">
       <div class="hd"><div class="brand">Myquence</div><div class="month">2026년 8월</div></div>
       <div class="band">
-        <span class="chip" style="box-shadow:inset 3px 0 0 #2563A8">직장</span>
-        <span class="chip" style="box-shadow:inset 3px 0 0 #3F7A34">개인</span>
-        <span class="chip" style="box-shadow:inset 3px 0 0 #B4562A">가족</span>
+        <span class="cchip" style="color:var(--blue-text);box-shadow:inset 3px 0 0 var(--blue-dot)">직장</span>
+        <span class="cchip" style="color:var(--green-text);box-shadow:inset 3px 0 0 var(--green-dot)">개인</span>
+        <span class="cchip" style="color:var(--orange-text);box-shadow:inset 3px 0 0 var(--orange-dot)">가족</span>
       </div>
       <div class="cal">
         <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-        <div class="grid7">
+        <div class="g7">
           <div class="cell">26</div><div class="cell">27</div><div class="cell">28</div><div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell">1</div>
           <div class="cell">2</div>
-          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
-          <div class="cell">4<div class="dots"><i style="background:#2563A8"></i></div></div>
-          <div class="cell">5<div class="dots"><i style="background:#B4562A"></i></div></div>
+          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
+          <div class="cell">4<div class="dots"><i style="background:var(--blue-dot)"></i></div></div>
+          <div class="cell">5<div class="dots"><i style="background:var(--orange-dot)"></i></div></div>
           <div class="cell">6</div>
-          <div class="cell">7<div class="bar" style="background:#3F7A34"></div></div>
-          <div class="cell">8<div class="bar" style="background:#3F7A34"></div></div>
+          <div class="cell">7<div class="bar" style="background:var(--green-dot)"></div></div>
+          <div class="cell">8<div class="bar" style="background:var(--green-dot)"></div></div>
         </div>
       </div>
       <div class="sect"><span>8월 3일 · 오늘</span><span>3개</span></div>
       <div class="list">
-        <div class="item" style="border-left-color:#2563A8">
-          <span class="cb"></span><div><div class="it-t">주간보고 초안</div><div class="it-m"><span style="color:#2563A8;font-weight:600">직장</span></div></div>
+        <div class="item" style="border-left-color:var(--blue-dot)">
+          <span class="cb"></span><div><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span style="color:var(--blue-text)">직장</span></div></div>
         </div>
-        <div class="item" style="border-left-color:#B4562A">
-          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div><div class="it-m"><span style="color:#B4562A;font-weight:600">가족</span></div></div>
+        <div class="item" style="border-left-color:var(--orange-dot)">
+          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span style="color:var(--orange-text)">가족</span></div></div>
         </div>
-        <div class="item" style="border-left-color:#3F7A34">
-          <span class="cb"></span><div><div class="it-t">30분 걷기</div><div class="it-m"><span style="color:#3F7A34;font-weight:600">개인</span><span>12/31일</span></div></div>
+        <div class="item" style="border-left-color:var(--green-dot)">
+          <span class="cb"></span><div><div class="it-t">30분 걷기</div>
+          <div class="it-m"><span style="color:var(--green-text)">개인</span><span style="color:var(--ink3)">12/31일</span></div></div>
         </div>
       </div>
       <div class="inp"><span>✎</span><span>할일 추가…</span></div>
@@ -236,108 +285,116 @@ td:first-child{font-weight:600;width:150px}
     <div class="pro">
       <b>강점</b>
       <ul><li><b>제목이 가장 진하다</b> — 시선이 할일 이름에 먼저 꽂힌다</li>
-      <li>색 면적이 작아 카테고리가 6개로 늘어도 시끄럽지 않다</li>
-      <li>색약 사용자에게도 유리 — 위계가 명도로 서 있다</li></ul>
+      <li>색이 좁아 카테고리가 <b>9개로 늘어도 견딘다</b></li>
+      <li>노랑처럼 밝은 색도 띠로 쓰면 문제없다</li></ul>
       <b>약점</b>
-      <ul><li class="neg">파스텔의 부드러운 인상이 사라진다</li></ul>
+      <ul><li class="neg">카드 자체는 무채색이라 색의 존재감이 B보다 약하다</li></ul>
     </div>
   </div>
 
   <!-- ══ B ══ -->
   <div class="opt">
     <span class="tag">시안 B</span>
-    <h2>딥 필</h2>
-    <p class="philo">카드를 진한 채도색으로 꽉 채우고 글자를 희게 뒤집는다. 명도 대비가 최대라 강약이 가장 세다.</p>
+    <h2>솔리드 블록</h2>
+    <p class="philo">카드를 원색으로 꽉 채운다. 차트의 색이 가장 그대로 살아나고 강약이 최대다. 대신 화면이 곧 색 블록의 나열이 된다.</p>
     <div class="phone tB">
       <div class="hd"><div class="brand">Myquence</div><div class="month">2026년 8월</div></div>
       <div class="band">
-        <span class="chip" style="background:#2B5F94">직장</span>
-        <span class="chip" style="background:#3E7A45">개인</span>
-        <span class="chip" style="background:#A85A38">가족</span>
+        <span class="cchip" style="background:var(--blue-dot);color:var(--blue-on)">직장</span>
+        <span class="cchip" style="background:var(--green-dot);color:var(--green-on)">개인</span>
+        <span class="cchip" style="background:var(--orange-dot);color:var(--orange-on)">가족</span>
       </div>
       <div class="cal">
         <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-        <div class="grid7">
+        <div class="g7">
           <div class="cell">26</div><div class="cell">27</div><div class="cell">28</div><div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell">1</div>
           <div class="cell">2</div>
-          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
-          <div class="cell">4<div class="dots"><i style="background:#2B5F94"></i></div></div>
-          <div class="cell">5<div class="dots"><i style="background:#A85A38"></i></div></div>
+          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
+          <div class="cell">4<div class="dots"><i style="background:var(--blue-dot)"></i></div></div>
+          <div class="cell">5<div class="dots"><i style="background:var(--orange-dot)"></i></div></div>
           <div class="cell">6</div>
-          <div class="cell">7<div class="bar" style="background:#3E7A45"></div></div>
-          <div class="cell">8<div class="bar" style="background:#3E7A45"></div></div>
+          <div class="cell">7<div class="bar" style="background:var(--green-dot)"></div></div>
+          <div class="cell">8<div class="bar" style="background:var(--green-dot)"></div></div>
         </div>
       </div>
       <div class="sect"><span>8월 3일 · 오늘</span><span>3개</span></div>
       <div class="list">
-        <div class="item" style="background:#2B5F94">
-          <span class="cb"></span><div><div class="it-t">주간보고 초안</div><div class="it-m"><span>직장</span></div></div>
+        <div class="item" style="background:var(--blue-dot);color:var(--blue-on)">
+          <span class="cb"></span><div><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span style="opacity:.85">직장</span></div></div>
         </div>
-        <div class="item" style="background:#A85A38">
-          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div><div class="it-m"><span>가족</span></div></div>
+        <div class="item" style="background:var(--orange-dot);color:var(--orange-on)">
+          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span style="opacity:.8">가족</span></div></div>
         </div>
-        <div class="item" style="background:#3E7A45">
-          <span class="cb"></span><div><div class="it-t">30분 걷기</div><div class="it-m"><span>개인</span><span>12/31일</span></div></div>
+        <div class="item" style="background:var(--green-dot);color:var(--green-on)">
+          <span class="cb"></span><div><div class="it-t">30분 걷기</div>
+          <div class="it-m"><span style="opacity:.85">개인</span><span style="opacity:.85">12/31일</span></div></div>
         </div>
       </div>
       <div class="inp"><span>✎</span><span>할일 추가…</span></div>
     </div>
     <div class="pro">
       <b>강점</b>
-      <ul><li>카테고리 구분이 <b>가장 강렬하다</b>. 멀리서도 색이 읽힌다</li>
-      <li>완료 항목을 회색으로 떨어뜨리면 대비가 극적으로 살아난다</li></ul>
+      <ul><li>차트의 인상이 <b>가장 그대로</b> 재현된다</li>
+      <li>멀리서도 카테고리가 읽힌다</li></ul>
       <b>약점</b>
-      <ul><li class="neg">할일이 5개만 넘어도 화면이 <b>색 블록의 나열</b>이 된다</li>
-      <li class="neg">업무 중 수시로 여는 앱으로는 피로하다</li></ul>
+      <ul><li class="neg">할일 5개만 넘어도 <b>눈이 쉴 곳이 없다</b></li>
+      <li class="neg">노랑 카드에는 검정 글자를 써야 해 <b>규칙이 색마다 갈린다</b></li>
+      <li class="neg">완료 처리(흐리게)가 어색해진다 — 진한 색이 탁해 보임</li></ul>
     </div>
   </div>
 
   <!-- ══ C ══ -->
   <div class="opt">
     <span class="tag">시안 C</span>
-    <h2>다크 &amp; 액센트</h2>
-    <p class="philo">어두운 판 위에서는 같은 색도 훨씬 또렷해진다. 색을 진하게 쓰지 않고도 강약이 선다.</p>
+    <h2>블랙 캔버스</h2>
+    <p class="philo">차트의 Black(격식·집중)을 바탕으로 깐다. 어두운 판 위에서 원색은 발광하듯 살아나, 좁은 면적으로도 강약이 선다.</p>
     <div class="phone tC">
       <div class="hd"><div class="brand">Myquence</div><div class="month">2026년 8월</div></div>
       <div class="band">
-        <span class="chip" style="box-shadow:inset 3px 0 0 #5E9BD8">직장</span>
-        <span class="chip" style="box-shadow:inset 3px 0 0 #7BC46A">개인</span>
-        <span class="chip" style="box-shadow:inset 3px 0 0 #E0895C">가족</span>
+        <span class="cchip" style="box-shadow:inset 3px 0 0 var(--blue-dot)">직장</span>
+        <span class="cchip" style="box-shadow:inset 3px 0 0 var(--green-dot)">개인</span>
+        <span class="cchip" style="box-shadow:inset 3px 0 0 var(--orange-dot)">가족</span>
       </div>
       <div class="cal">
         <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-        <div class="grid7">
+        <div class="g7">
           <div class="cell">26</div><div class="cell">27</div><div class="cell">28</div><div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell">1</div>
           <div class="cell">2</div>
-          <div class="cell today">3<div class="dots"><i style="background:#0f1114"></i><i style="background:#0f1114"></i></div></div>
-          <div class="cell">4<div class="dots"><i style="background:#5E9BD8"></i></div></div>
-          <div class="cell">5<div class="dots"><i style="background:#E0895C"></i></div></div>
+          <div class="cell today">3<div class="dots"><i style="background:#0d0d0f"></i><i style="background:#0d0d0f"></i><i style="background:#0d0d0f"></i></div></div>
+          <div class="cell">4<div class="dots"><i style="background:var(--blue-dot)"></i></div></div>
+          <div class="cell">5<div class="dots"><i style="background:var(--orange-dot)"></i></div></div>
           <div class="cell">6</div>
-          <div class="cell">7<div class="bar" style="background:#7BC46A"></div></div>
-          <div class="cell">8<div class="bar" style="background:#7BC46A"></div></div>
+          <div class="cell">7<div class="bar" style="background:var(--green-dot)"></div></div>
+          <div class="cell">8<div class="bar" style="background:var(--green-dot)"></div></div>
         </div>
       </div>
       <div class="sect"><span>8월 3일 · 오늘</span><span>3개</span></div>
       <div class="list">
-        <div class="item" style="border-left-color:#5E9BD8">
-          <span class="cb"></span><div><div class="it-t">주간보고 초안</div><div class="it-m"><span style="color:#5E9BD8;font-weight:600">직장</span></div></div>
+        <div class="item" style="border-left-color:var(--blue-dot)">
+          <span class="cb"></span><div><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span style="color:var(--blue-dot)">직장</span></div></div>
         </div>
-        <div class="item" style="border-left-color:#E0895C">
-          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div><div class="it-m"><span style="color:#E0895C;font-weight:600">가족</span></div></div>
+        <div class="item" style="border-left-color:var(--orange-dot)">
+          <span class="cb"></span><div><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span style="color:var(--orange-dot)">가족</span></div></div>
         </div>
-        <div class="item" style="border-left-color:#7BC46A">
-          <span class="cb"></span><div><div class="it-t">30분 걷기</div><div class="it-m"><span style="color:#7BC46A;font-weight:600">개인</span><span>12/31일</span></div></div>
+        <div class="item" style="border-left-color:var(--green-dot)">
+          <span class="cb"></span><div><div class="it-t">30분 걷기</div>
+          <div class="it-m"><span style="color:var(--green-dot)">개인</span><span style="color:#7c828b">12/31일</span></div></div>
         </div>
       </div>
       <div class="inp"><span>✎</span><span>할일 추가…</span></div>
     </div>
     <div class="pro">
       <b>강점</b>
-      <ul><li>밤에 침대에서 여는 시나리오(S6)에 가장 잘 맞는다</li>
-      <li>같은 색을 써도 <b>어두운 배경 덕에 채도가 살아난다</b></li></ul>
+      <ul><li>원색이 <b>가장 또렷하게</b> 보인다. 어두운 배경이 채도를 밀어 올린다</li>
+      <li>밤에 침대에서 여는 시나리오(S6)에 최적</li>
+      <li>텍스트용 어두운 톤이 필요 없다 — <b>원색을 그대로</b> 글자에 쓸 수 있다</li></ul>
       <b>약점</b>
-      <ul><li class="neg">밝은 곳에서 달력 숫자 가독성이 떨어진다</li>
-      <li class="neg">라이트/다크 두 벌을 관리해야 한다 (색 24종)</li></ul>
+      <ul><li class="neg">밝은 야외에서 가독성이 떨어진다</li>
+      <li class="neg">라이트 테마를 별도로 관리해야 한다</li></ul>
     </div>
   </div>
 
@@ -345,32 +402,31 @@ td:first-child{font-weight:600;width:150px}
 
 <div class="hr"></div>
 
-<h2>비교</h2>
+<h2>3. 비교</h2>
 <table>
-<tr><th>기준</th><th>현재 파스텔</th><th>A 잉크 &amp; 액센트</th><th>B 딥 필</th><th>C 다크</th></tr>
-<tr><td>강약</td><td class="neg">약함</td><td><b>강함</b></td><td><b>매우 강함</b></td><td><b>강함</b></td></tr>
-<tr><td>제목 가독성</td><td>보통</td><td><b>최상</b></td><td>좋음</td><td>좋음</td></tr>
-<tr><td>카테고리 구분</td><td>약함</td><td>좋음</td><td><b>최상</b></td><td>좋음</td></tr>
-<tr><td>할일 10개일 때</td><td>평평함</td><td><b>깔끔</b></td><td class="neg">피로함</td><td>양호</td></tr>
-<tr><td>카테고리 6개 이상</td><td>구분 안 됨</td><td><b>견딤</b></td><td class="neg">시끄러움</td><td>견딤</td></tr>
-<tr><td>색약 접근성</td><td class="neg">불리</td><td><b>유리</b></td><td>보통</td><td>보통</td></tr>
-<tr><td>작업량</td><td>—</td><td><b>적음</b> (토큰 교체)</td><td>중간</td><td class="neg">많음 (24색)</td></tr>
+<tr><th>기준</th><th>기존 파스텔</th><th>A 액센트 스트라이프</th><th>B 솔리드 블록</th><th>C 블랙 캔버스</th></tr>
+<tr><td>강약</td><td class="neg">약함</td><td class="ok">강함</td><td class="ok">매우 강함</td><td class="ok">강함</td></tr>
+<tr><td>제목 가독성</td><td>보통</td><td class="ok">최상</td><td>좋음</td><td class="ok">최상</td></tr>
+<tr><td>카테고리 구분</td><td class="neg">약함</td><td>좋음</td><td class="ok">최상</td><td class="ok">최상</td></tr>
+<tr><td>할일 10개일 때</td><td>평평함</td><td class="ok">깔끔</td><td class="neg">피로함</td><td>양호</td></tr>
+<tr><td>카테고리 9개일 때</td><td class="neg">구분 안 됨</td><td class="ok">견딤</td><td class="neg">시끄러움</td><td class="ok">견딤</td></tr>
+<tr><td>노랑·주황 처리</td><td>해당 없음</td><td class="ok">문제없음</td><td class="neg">글자색 규칙이 갈림</td><td class="ok">문제없음</td></tr>
+<tr><td>완료 표현</td><td>보통</td><td class="ok">자연스러움</td><td class="neg">탁해 보임</td><td class="ok">자연스러움</td></tr>
+<tr><td>작업량</td><td>—</td><td class="ok">적음 (토큰 교체)</td><td>중간</td><td class="neg">많음 (두 벌)</td></tr>
 </table>
 
 <div class="note">
-<b>추천: 시안 A — 잉크 &amp; 액센트</b><br>
-지금 문제의 본질은 "색이 예쁘지 않다"가 아니라 <b>모든 요소가 같은 밝기라 위계가 없다</b>는 것이다.
-A는 색을 좁은 면적에 진하게 몰고, 강약은 <b>글자 굵기와 무채색 명도</b>로 만든다.
-할일이 늘어도 카테고리가 늘어도 무너지지 않는 유일한 안이고,
-CSS 변수만 교체하면 되므로 구조를 손대지 않는다.
+<b>추천: A(라이트) + C(다크) 한 쌍</b><br>
+둘은 <b>같은 구조에 배경만 뒤집은 것</b>이다. 카드는 무채색, 색은 좌측 띠·라벨·달력 점에만 —
+규칙이 동일해서 토큰 값만 갈아끼우면 한 벌로 관리된다.
+A를 기본으로 확정하고 C를 다크 모드로 붙이면, 낮의 사무실과 밤의 침대가 모두 덮인다.
 <br><br>
-<b>A + C 조합도 가능하다.</b> A를 라이트 테마로 확정하고, C를 다크 모드로 붙이면
-밤에 침대에서 여는 시나리오(S6)까지 덮인다. 색 정의가 A와 같은 구조라 확장이 자연스럽다.
+B는 차트의 인상을 가장 잘 살리지만, <b>매일 여러 번 여는 앱</b>에는 맞지 않는다.
+할일이 쌓일수록 화면이 색 블록의 벽이 되고, 노랑에만 검정 글자를 쓰는 예외가 생긴다.
+색을 강하게 쓰되 <b>면적을 좁히는 것</b>이 이 앱의 답이다.
 </div>
 
-<p class="sub" style="margin-top:26px">
-  Myquence · 테마 시안 · 2026-08-03
-</p>
+<p class="sub" style="margin-top:26px">Myquence · 비비드 테마 시안 · 2026-08-03</p>
 
 </div>
 </body>
