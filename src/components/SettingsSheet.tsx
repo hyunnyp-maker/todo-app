@@ -6,9 +6,11 @@ import { BackupSection } from "@/components/settings/BackupSection";
 import { Sheet } from "@/components/ui/Sheet";
 import { getSupabaseClient } from "@/data/supabase/client";
 import type { ThemeMode } from "@/domain/types";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
+import { promptInstall } from "@/lib/install";
 import { playChime } from "@/lib/sound";
 
 const THEMES: { mode: ThemeMode; label: string; hint: string }[] = [
@@ -41,6 +43,7 @@ export function SettingsSheet({
   const { user, isConfigured } = useSession();
   const { pending } = useSyncQueue();
   const { supported, granted, denied, request } = useNotificationPermission();
+  const install = useInstallPrompt();
 
   async function signOut() {
     // 아직 서버로 못 보낸 변경이 있으면 로그아웃과 함께 사라진다 (요구사항 3.4)
@@ -214,13 +217,68 @@ export function SettingsSheet({
 
       <BackupSection />
 
-      {/* 설치 유도 팝업은 띄우지 않는다 (E2). 원하는 사람만 찾아 쓰게 한 줄로 */}
+      {/* 설치 유도 팝업은 띄우지 않는다 (E2). 설정에 들어온 사람에게만 보여준다 */}
       <div className="mt-[14px] border-t border-line pt-[12px]">
         <p className="text-[13px]">홈 화면에 추가</p>
-        <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
-          브라우저 메뉴에서 &lsquo;홈 화면에 추가&rsquo;를 고르면 주소창 없이 앱처럼
-          열립니다. 오프라인에서도 실행됩니다.
-        </p>
+
+        {install === "installed" ? (
+          <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+            이미 홈 화면에서 실행 중입니다.
+          </p>
+        ) : install === "ios" ? (
+          <>
+            <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+              주소창 없이 앱처럼 열리고 오프라인에서도 실행됩니다. iOS는 버튼으로
+              설치할 수 없어 직접 추가해야 합니다.
+            </p>
+            <ol className="mt-[8px] flex flex-col gap-[6px]">
+              {[
+                "Safari 하단(또는 상단)의 공유 버튼을 누릅니다",
+                "목록을 내려 ‘홈 화면에 추가’를 고릅니다",
+                "오른쪽 위 ‘추가’를 누릅니다",
+              ].map((step, i) => (
+                <li
+                  key={step}
+                  className="flex items-start gap-[8px] text-[11.5px] leading-[1.5]"
+                >
+                  <span
+                    aria-hidden
+                    className="mt-[1px] flex size-[17px] shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                    style={{ background: "var(--ink)", color: "var(--surface)" }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-ink-2">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-[8px] text-[11px] leading-[1.6] text-ink-3">
+              공유 버튼은 사각형에서 화살표가 위로 나온 모양입니다. 다른 브라우저의
+              탭에서는 이 항목이 보이지 않을 수 있습니다 — Safari에서 열어 주세요.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+              주소창 없이 앱처럼 열립니다. 오프라인에서도 실행됩니다.
+            </p>
+            {install === "prompt" ? (
+              <button
+                type="button"
+                onClick={() => void promptInstall()}
+                className="mt-[8px] min-h-[44px] rounded-[10px] px-[14px] text-[12.5px] font-semibold"
+                style={{ background: "var(--ink)", color: "var(--surface)" }}
+              >
+                홈 화면에 추가
+              </button>
+            ) : (
+              <p className="mt-[6px] text-[11px] leading-[1.6] text-ink-3">
+                브라우저 메뉴에서 &lsquo;홈 화면에 추가&rsquo; 또는 &lsquo;앱
+                설치&rsquo;를 고르세요.
+              </p>
+            )}
+          </>
+        )}
       </div>
 
       <div className="mt-[16px] border-t border-line pt-[12px] text-center">
