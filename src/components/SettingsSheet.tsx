@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { Brand } from "@/components/Brand";
+import { BackupSection } from "@/components/settings/BackupSection";
 import { Sheet } from "@/components/ui/Sheet";
 import { getSupabaseClient } from "@/data/supabase/client";
 import type { ThemeMode } from "@/domain/types";
+import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
 
@@ -33,6 +35,7 @@ export function SettingsSheet({
 }: Props) {
   const { user, isConfigured } = useSession();
   const { pending } = useSyncQueue();
+  const { supported, granted, denied, request } = useNotificationPermission();
 
   async function signOut() {
     // 아직 서버로 못 보낸 변경이 있으면 로그아웃과 함께 사라진다 (요구사항 3.4)
@@ -146,6 +149,31 @@ export function SettingsSheet({
           ? `서버에 보내지 못한 변경 ${pending}건이 대기 중입니다. 온라인이 되면 자동으로 전송됩니다.`
           : "오프라인에서도 쓸 수 있습니다. 연결이 돌아오면 자동으로 맞춰집니다."}
       </p>
+
+      {/* 알림은 할일마다 켠다. 여기서는 상태와 한계만 알린다 */}
+      <div className="mt-[14px] border-t border-line pt-[12px]">
+        <p className="text-[13px]">알림</p>
+        <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+          {!supported
+            ? "이 브라우저는 알림을 지원하지 않습니다."
+            : denied
+              ? "권한이 차단돼 있습니다. 주소창의 자물쇠 → 알림에서 허용으로 바꿔 주세요."
+              : granted
+                ? "허용됨. 할일 상세에서 알림 시점을 고르면 울립니다. 앱이 열려 있을 때만 동작합니다 — 탭을 완전히 닫으면 울리지 않습니다."
+                : "알림은 기본적으로 꺼져 있습니다. 할일 상세에서 알림을 켤 때 권한을 묻습니다."}
+        </p>
+        {supported && !granted && !denied && (
+          <button
+            type="button"
+            onClick={() => void request()}
+            className="mt-[8px] min-h-[44px] rounded-[10px] bg-line-2 px-[14px] text-[12.5px] font-semibold"
+          >
+            알림 권한 허용
+          </button>
+        )}
+      </div>
+
+      <BackupSection />
 
       {/* 설치 유도 팝업은 띄우지 않는다 (E2). 원하는 사람만 찾아 쓰게 한 줄로 */}
       <div className="mt-[14px] border-t border-line pt-[12px]">

@@ -7,6 +7,8 @@
 
 import { applyCategoryDelete } from "@/domain/category";
 import { overlapsRange } from "@/domain/date";
+import { completionKey } from "@/domain/recurrence";
+import { searchTasksByTitle } from "@/domain/search";
 import { overdueTasks } from "@/domain/task";
 import type {
   Category,
@@ -15,8 +17,9 @@ import type {
   GuestData,
   ISODate,
   Task,
+  TaskCompletion,
 } from "@/domain/types";
-import type { TodoRepository } from "../repository";
+import type { RepositorySnapshot, TodoRepository } from "../repository";
 import { loadGuestData, saveGuestData } from "./storage";
 
 export class LocalRepository implements TodoRepository {
@@ -97,7 +100,57 @@ export class LocalRepository implements TodoRepository {
   async deleteTask(id: string): Promise<void> {
     const data = this.read();
     data.tasks = data.tasks.filter((t) => t.id !== id);
+    // 할일이 사라지면 그 완료 기록도 함께 사라져야 한다 (DB의 on delete cascade와 같은 역할)
+    data.completions = data.completions.filter((c) => c.taskId !== id);
     this.write(data);
+  }
+
+  async searchTasks(query: string): Promise<Task[]> {
+    return searchTasksByTitle(this.read().tasks, query);
+  }
+
+  async listCompletions(range: DateRange): Promise<TaskCompletion[]> {
+    return this.read().completions.filter(
+      (c) => c.date >= range.from && c.date <= range.to,
+    );
+  }
+
+  async setCompletion(
+    taskId: string,
+    date: ISODate,
+    done: boolean,
+  ): Promise<void> {
+    const data = this.read();
+    const key = completionKey(taskId, date);
+    const rest = data.completions.filter(
+      (c) => completionKey(c.taskId, c.date) !== key,
+    );
+    data.completions = done ? [...rest, { taskId, date }] : rest;
+    this.write(data);
+  }
+
+  async exportSnapshot(): Promise<RepositorySnapshot> {
+    const data = this.read();
+    return {
+      categories: data.categories,
+      tasks: data.tasks,
+      completions: data.completions,
+    };
+  }
+
+  /**
+   * 쓰기가 한 번뿐이라 중간 상태가 존재하지 않는다.
+   * 실패하면 아무것도 바뀌지 않고, 성공하면 전부 바뀐다.
+   */
+  async importSnapshot(snapshot: RepositorySnapshot): Promise<void> {
+    const data = this.read();
+    this.write({
+      schemaVersion: 1,
+      categories: snapshot.categories,
+      tasks: snapshot.tasks,
+      completions: snapshot.completions,
+      migrationAsked: data.migrationAsked,
+    });
   }
 }
 

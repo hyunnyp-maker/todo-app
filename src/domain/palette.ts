@@ -22,6 +22,11 @@ export interface ToneSet {
   tx: string;
   /** 원색 — 좌측 띠 · 점 · 막대 */
   dt: string;
+  /**
+   * 색을 꽉 채운 칩의 배경. 항상 흰 글자를 얹는 전제로 명도를 낮춘 값이다.
+   * dt를 그대로 채우면 흰 글자가 노랑 위에서 1.5:1이 되어 사라진다.
+   */
+  cp: string;
 }
 
 export const PALETTE_KEYS: readonly PaletteKey[] = [
@@ -108,6 +113,7 @@ export const UNCATEGORIZED_TONE: ToneSet = {
   bg: "var(--none-bg)",
   tx: "var(--none-tx)",
   dt: "var(--none-dt)",
+  cp: "var(--none-cp)",
 };
 
 export function toneOf(color: PaletteKey | null | undefined): ToneSet {
@@ -116,6 +122,7 @@ export function toneOf(color: PaletteKey | null | undefined): ToneSet {
     bg: `var(--${color}-bg)`,
     tx: `var(--${color}-tx)`,
     dt: `var(--${color}-dt)`,
+    cp: `var(--${color}-cp)`,
   };
 }
 

@@ -56,19 +56,23 @@ export function ColorPalette({ value, used, onChange }: Props) {
               inUse ? " (사용 중)" : ""
             }`}
             aria-pressed={selected}
-            className="flex flex-col items-start gap-[5px] rounded-[10px] border px-[9px] py-[8px] text-left transition-colors"
+            className="flex min-h-[52px] flex-col items-start justify-center gap-[5px] rounded-[10px] border px-[9px] py-[8px] text-left transition-colors"
             style={{
               background: selected ? tone.bg : "var(--line-2)",
               borderColor: selected ? tone.dt : "transparent",
               borderWidth: selected ? 2 : 1,
             }}
           >
-            <span className="flex w-full items-center gap-[6px]">
-              {/* 원색 그대로 — 이 색이 카드 좌측 띠와 달력 점에 쓰인다 */}
+            <span className="flex w-full items-center gap-[7px]">
+              {/* 색상칩 — 이 색이 카테고리 뱃지와 카드 좌측 띠, 달력 점에 그대로 쓰인다.
+                  가는 띠보다 채워진 원이 먼저 읽힌다 */}
               <span
                 aria-hidden
-                className="h-[14px] w-[5px] shrink-0 rounded-[2px]"
-                style={{ background: tone.dt }}
+                className="size-[16px] shrink-0 rounded-full"
+                style={{
+                  background: tone.dt,
+                  boxShadow: selected ? `0 0 0 2px var(--surface), 0 0 0 3.5px ${tone.dt}` : undefined,
+                }}
               />
               <span
                 className="truncate text-[11.5px] font-semibold"

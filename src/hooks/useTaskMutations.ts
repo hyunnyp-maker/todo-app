@@ -5,8 +5,21 @@ import { newId } from "@/data/repository";
 import { enqueue } from "@/data/sync/queue";
 import type { NewQueueOp } from "@/data/sync/types";
 import { addDays, dayCount } from "@/domain/date";
+import {
+  completionKey,
+  recurrenceEndDate,
+  type CompletionSet,
+  EMPTY_COMPLETIONS,
+} from "@/domain/recurrence";
+import { DEFAULT_REMINDER_TIME } from "@/domain/reminder";
 import { isDoneOn, toggleCompletedDate } from "@/domain/task";
-import type { ISODate, Task } from "@/domain/types";
+import type {
+  ISODate,
+  RecurrenceRule,
+  ReminderOffset,
+  Task,
+  TaskCompletion,
+} from "@/domain/types";
 import { queryKeys } from "./queryKeys";
 import { useOwnerScope, useRepository } from "./useRepository";
 
@@ -17,21 +30,34 @@ export interface DraftTask {
   endDate?: ISODate;
   checkMode?: Task["checkMode"];
   memo?: string;
+  recurrence?: RecurrenceRule | null;
+  reminder?: ReminderOffset;
+  reminderTime?: string;
 }
 
 export function buildTask(draft: DraftTask): Task {
   const start = draft.startDate;
   const end = draft.endDate ?? start;
+  const recurrence = draft.recurrence ?? null;
   return {
     id: newId(),
     categoryId: draft.categoryId,
     title: draft.title.trim(),
     memo: draft.memo,
     startDate: start <= end ? start : end,
-    endDate: start <= end ? end : start,
-    checkMode: draft.checkMode ?? "once",
+    // 반복이 걸리면 종료일은 규칙이 정한다. 둘이 어긋나면 달력 조회에서 빠진다
+    endDate: recurrence
+      ? recurrenceEndDate(recurrence)
+      : start <= end
+        ? end
+        : start,
+    // 반복 일정은 회차별 완료 기록으로 판정한다. checkMode는 보지 않는다
+    checkMode: recurrence ? "once" : (draft.checkMode ?? "once"),
     done: false,
     completedDates: [],
+    recurrence,
+    reminder: draft.reminder ?? "none",
+    reminderTime: draft.reminderTime ?? DEFAULT_REMINDER_TIME,
     sortOrder: Date.now() % 1_000_000,
     createdAt: new Date().toISOString(),
   };
@@ -64,8 +90,20 @@ export function useTaskMutations() {
     );
   };
 
-  const invalidate = () =>
+  const patchCompletions = (
+    fn: (rows: TaskCompletion[]) => TaskCompletion[],
+  ) => {
+    qc.setQueriesData<TaskCompletion[]>(
+      { queryKey: queryKeys.completionsAll(scope) },
+      (old) => (old ? fn(old) : old),
+    );
+  };
+
+  const invalidate = () => {
     qc.invalidateQueries({ queryKey: queryKeys.tasksAll(scope) });
+    // 검색 결과에도 방금 만든 할일이 반영돼야 한다
+    qc.invalidateQueries({ queryKey: queryKeys.searchAll(scope) });
+  };
 
   /**
    * 전송이 실패해도 화면을 되돌리지 않는다.
@@ -105,17 +143,63 @@ export function useTaskMutations() {
     onMutate: async (id) => {
       await qc.cancelQueries({ queryKey: queryKeys.tasksAll(scope) });
       patchCaches((tasks) => tasks.filter((t) => t.id !== id));
+      patchCompletions((rows) => rows.filter((r) => r.taskId !== id));
     },
     onError: (_e, id) => queueOnError({ kind: "task.delete", entityId: id })(),
     onSuccess: invalidate,
   });
 
+  /** 반복 일정의 그 회차 하나. 본체는 건드리지 않는다 */
+  const completion = useMutation({
+    mutationFn: ({
+      taskId,
+      date,
+      done,
+    }: {
+      taskId: string;
+      date: ISODate;
+      done: boolean;
+    }) => repo.setCompletion(taskId, date, done),
+    onMutate: async ({ taskId, date, done }) => {
+      await qc.cancelQueries({ queryKey: queryKeys.completionsAll(scope) });
+      patchCompletions((rows) => {
+        const rest = rows.filter(
+          (r) => completionKey(r.taskId, r.date) !== completionKey(taskId, date),
+        );
+        return done ? [...rest, { taskId, date }] : rest;
+      });
+    },
+    onError: (_e, { taskId, date, done }) =>
+      queueOnError({
+        kind: "task.completion",
+        entityId: completionKey(taskId, date),
+        taskId,
+        date,
+        done,
+      })(),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.completionsAll(scope) }),
+  });
+
   /**
    * 체크 토글.
+   *   반복  — 그 회차 하나만 별도 기록에 남긴다
    *   once  — done 하나를 뒤집는다
    *   daily — 그 날짜만 뒤집는다. 다른 날짜는 건드리지 않는다 (P10: 과거 날짜도 가능)
    */
-  function toggle(task: Task, on: ISODate) {
+  function toggle(
+    task: Task,
+    on: ISODate,
+    completions: CompletionSet = EMPTY_COMPLETIONS,
+  ) {
+    if (task.recurrence) {
+      completion.mutate({
+        taskId: task.id,
+        date: on,
+        done: !isDoneOn(task, on, completions),
+      });
+      return;
+    }
     if (task.checkMode === "once") {
       update.mutate({ id: task.id, patch: { done: !task.done } });
     } else {

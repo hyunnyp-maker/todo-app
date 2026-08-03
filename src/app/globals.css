@@ -28,20 +28,25 @@
   --none-bg: #f1f2f4;
   --none-tx: #6b7076;
   --none-dt: #9aa0a6;
+  --none-cp: #5f656b;
 
   /* ── 비비드 9색 ──
-     bg 옅은 배경 / tx 라벨 텍스트 / dt 원색
+     bg 옅은 배경 / tx 라벨 텍스트 / dt 원색 / cp 색을 꽉 채운 칩
      tx는 배경 위 4.5:1을 넘도록 조정한 값이다.
-     원색을 그대로 글자에 쓰면 노랑 1.3:1, 주황 2.2:1로 읽히지 않는다. */
-  --red-bg: #fdecec;    --red-tx: #c21620;    --red-dt: #e1232b;
-  --orange-bg: #fdf0e2; --orange-tx: #a65a00; --orange-dt: #ef8b22;
-  --yellow-bg: #fbf6d8; --yellow-tx: #7e6b00; --yellow-dt: #f0d426;
-  --green-bg: #e4f5ec;  --green-tx: #007a42;  --green-dt: #00a65a;
-  --blue-bg: #e8f2fc;   --blue-tx: #1565b0;   --blue-dt: #4ca0e5;
-  --pink-bg: #fce6f3;   --pink-tx: #b8007a;   --pink-dt: #e10096;
-  --purple-bg: #f0e8f6; --purple-tx: #6b3590; --purple-dt: #7c40a2;
-  --brown-bg: #f2eae4;  --brown-tx: #6a3410;  --brown-dt: #8a4a1c;
-  --ink-bg: #eeeff1;    --ink-tx: #141414;    --ink-dt: #141414;
+     원색을 그대로 글자에 쓰면 노랑 1.3:1, 주황 2.2:1로 읽히지 않는다.
+
+     cp가 dt와 다른 이유도 같다. 카테고리 뱃지는 색을 꽉 채우고 흰 글자를 얹는데,
+     dt를 그대로 채우면 흰 글자가 노랑 위 1.5:1, 블루 위 2.4:1이 된다.
+     색상은 유지한 채 명도만 낮춰 흰 글자가 4.5:1을 넘도록 잡은 값이다. */
+  --red-bg: #fdecec;    --red-tx: #c21620;    --red-dt: #e1232b;   --red-cp: #c21620;
+  --orange-bg: #fdf0e2; --orange-tx: #a65a00; --orange-dt: #ef8b22; --orange-cp: #a65a00;
+  --yellow-bg: #fbf6d8; --yellow-tx: #7e6b00; --yellow-dt: #f0d426; --yellow-cp: #7e6b00;
+  --green-bg: #e4f5ec;  --green-tx: #007a42;  --green-dt: #00a65a;  --green-cp: #007a42;
+  --blue-bg: #e8f2fc;   --blue-tx: #1565b0;   --blue-dt: #4ca0e5;   --blue-cp: #1565b0;
+  --pink-bg: #fce6f3;   --pink-tx: #b8007a;   --pink-dt: #e10096;   --pink-cp: #b8007a;
+  --purple-bg: #f0e8f6; --purple-tx: #6b3590; --purple-dt: #7c40a2; --purple-cp: #6b3590;
+  --brown-bg: #f2eae4;  --brown-tx: #6a3410;  --brown-dt: #8a4a1c;  --brown-cp: #6a3410;
+  --ink-bg: #eeeff1;    --ink-tx: #141414;    --ink-dt: #141414;    --ink-cp: #2b2e33;
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-check: 250ms;
@@ -68,16 +73,18 @@
   --none-bg: #1f2126;
   --none-tx: #9aa0a6;
   --none-dt: #6b7076;
+  --none-cp: #4a4f55;
 
-  --red-bg: #2a1518;    --red-tx: #ff6b6b;    --red-dt: #ff4d55;
-  --orange-bg: #2a1d10; --orange-tx: #f2a24e; --orange-dt: #f59b3c;
-  --yellow-bg: #29250f; --yellow-tx: #e8cf4e; --yellow-dt: #f0d426;
-  --green-bg: #10241a;  --green-tx: #3ecb86;  --green-dt: #22b96d;
-  --blue-bg: #10202e;   --blue-tx: #6fb6f0;   --blue-dt: #59a9ea;
-  --pink-bg: #2a1022;   --pink-tx: #f45cb8;   --pink-dt: #ee2aa5;
-  --purple-bg: #1f1429; --purple-tx: #a97fd0; --purple-dt: #9260be;
-  --brown-bg: #241a12;  --brown-tx: #c08b5e;  --brown-dt: #b0724a;
-  --ink-bg: #1f2126;    --ink-tx: #d2d6dc;    --ink-dt: #c3c8cf;
+  /* cp는 다크에서도 흰 글자 기준이다. tx(밝은 원색)를 채우면 흰 글자가 사라진다 */
+  --red-bg: #2a1518;    --red-tx: #ff6b6b;    --red-dt: #ff4d55;   --red-cp: #c8202a;
+  --orange-bg: #2a1d10; --orange-tx: #f2a24e; --orange-dt: #f59b3c; --orange-cp: #a85c05;
+  --yellow-bg: #29250f; --yellow-tx: #e8cf4e; --yellow-dt: #f0d426; --yellow-cp: #7d6a00;
+  --green-bg: #10241a;  --green-tx: #3ecb86;  --green-dt: #22b96d;  --green-cp: #00844a;
+  --blue-bg: #10202e;   --blue-tx: #6fb6f0;   --blue-dt: #59a9ea;   --blue-cp: #1a6cbb;
+  --pink-bg: #2a1022;   --pink-tx: #f45cb8;   --pink-dt: #ee2aa5;   --pink-cp: #bf0080;
+  --purple-bg: #1f1429; --purple-tx: #a97fd0; --purple-dt: #9260be; --purple-cp: #7a3f9f;
+  --brown-bg: #241a12;  --brown-tx: #c08b5e;  --brown-dt: #b0724a;  --brown-cp: #7d4319;
+  --ink-bg: #1f2126;    --ink-tx: #d2d6dc;    --ink-dt: #c3c8cf;    --ink-cp: #3a3d44;
 
   color-scheme: dark;
 }

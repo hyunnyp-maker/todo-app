@@ -11,7 +11,15 @@ import type {
   DateRange,
   ISODate,
   Task,
+  TaskCompletion,
 } from "@/domain/types";
+
+/** 백업·복원이 다루는 저장소의 전부. 설정은 저장소 밖(uiStore)에 있어 여기 없다 */
+export interface RepositorySnapshot {
+  categories: Category[];
+  tasks: Task[];
+  completions: TaskCompletion[];
+}
 
 export interface TodoRepository {
   listCategories(): Promise<Category[]>;
@@ -30,6 +38,22 @@ export interface TodoRepository {
   createTask(task: Task): Promise<Task>;
   updateTask(id: string, patch: Partial<Task>): Promise<Task>;
   deleteTask(id: string): Promise<void>;
+
+  /** 제목 부분 일치. 날짜 범위를 보지 않는다 — 검색은 지금 보는 달에 갇히면 안 된다 */
+  searchTasks(query: string): Promise<Task[]>;
+
+  /** 반복 일정의 날짜별 완료 기록 (range와 겹치는 것만) */
+  listCompletions(range: DateRange): Promise<TaskCompletion[]>;
+  /** 그 회차 하나만 켜고 끈다. 다른 날짜는 건드리지 않는다 */
+  setCompletion(taskId: string, date: ISODate, done: boolean): Promise<void>;
+
+  /** 백업 — 저장소 전체를 그대로 읽어낸다 */
+  exportSnapshot(): Promise<RepositorySnapshot>;
+  /**
+   * 복원 — 기존 데이터를 전부 지우고 스냅샷으로 갈아 끼운다.
+   * 중간에 실패해 절반만 남는 상태가 생기지 않아야 한다.
+   */
+  importSnapshot(snapshot: RepositorySnapshot): Promise<void>;
 }
 
 /**

@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { addDays, buildMonthGrid, WEEKDAY_LABELS } from "@/domain/date";
+import {
+  addDays,
+  buildMonthGrid,
+  monthGridRange,
+  WEEKDAY_LABELS,
+} from "@/domain/date";
+import { EMPTY_COMPLETIONS, type CompletionSet } from "@/domain/recurrence";
 import { buildDateIndex, sortTasksForDate } from "@/domain/task";
 import type { Category, ISODate, ISOMonth, Task } from "@/domain/types";
 import { CalendarCell } from "./CalendarCell";
@@ -12,6 +18,7 @@ interface Props {
   selectedDate: ISODate;
   tasks: Task[];
   categories: Category[];
+  completions?: CompletionSet;
   onSelect: (date: ISODate) => void;
   onShiftMonth: (delta: number) => void;
 }
@@ -24,6 +31,7 @@ export function MonthCalendar({
   selectedDate,
   tasks,
   categories,
+  completions = EMPTY_COMPLETIONS,
   onSelect,
   onShiftMonth,
 }: Props) {
@@ -34,8 +42,12 @@ export function MonthCalendar({
     [categories],
   );
 
-  // 42칸마다 filter를 돌리지 않도록 한 번만 인덱싱한다
-  const byDate = useMemo(() => buildDateIndex(tasks), [tasks]);
+  // 42칸마다 filter를 돌리지 않도록 한 번만 인덱싱한다.
+  // 범위를 넘기지 않으면 종료 없는 반복 일정이 9999년까지 펼쳐진다
+  const byDate = useMemo(
+    () => buildDateIndex(tasks, monthGridRange(month)),
+    [tasks, month],
+  );
 
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -90,6 +102,7 @@ export function MonthCalendar({
             byDate.get(date) ?? [],
             date,
             categories,
+            completions,
           );
           return (
             <CalendarCell
@@ -100,6 +113,7 @@ export function MonthCalendar({
               isSelected={date === selectedDate}
               tasks={dayTasks}
               categoryById={categoryById}
+              completions={completions}
               onSelect={onSelect}
             />
           );

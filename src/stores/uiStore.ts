@@ -27,6 +27,8 @@ interface UiState {
   goToToday: (today: ISODate) => void;
   setCalendarCollapsed: (v: boolean) => void;
   toggleCategory: (id: string) => void;
+  /** 백업 복원이 필터 상태를 통째로 되돌릴 때 쓴다 */
+  setHiddenCategoryIds: (ids: string[]) => void;
   setHideCompleted: (v: boolean) => void;
   toggleOverdue: () => void;
 }
@@ -83,6 +85,8 @@ export const useUiStore = create<UiState>()(
             ? s.hiddenCategoryIds.filter((x) => x !== id)
             : [...s.hiddenCategoryIds, id],
         })),
+
+      setHiddenCategoryIds: (ids) => set({ hiddenCategoryIds: ids }),
 
       setHideCompleted: (v) => set({ hideCompleted: v }),
       toggleOverdue: () => set((s) => ({ overdueOpen: !s.overdueOpen })),

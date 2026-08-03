@@ -68,15 +68,10 @@ export function QuickAddBar({
                   inputRef.current?.focus();
                 }}
                 aria-pressed={on}
-                className="shrink-0 overflow-hidden whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
+                className="shrink-0 overflow-hidden whitespace-nowrap rounded-full px-[11px] py-[5px] text-[11px] font-bold"
                 style={
                   on
-                    ? {
-                        background: "var(--line-2)",
-                        color: tone.tx,
-                        boxShadow: `inset 3px 0 0 ${tone.dt}`,
-                        outline: `1.5px solid ${tone.dt}`,
-                      }
+                    ? { background: tone.cp, color: "#ffffff" }
                     : { background: "var(--line-2)", color: "var(--ink-3)" }
                 }
               >

@@ -13,6 +13,9 @@ function task(over: Partial<Task> = {}): Task {
     checkMode: "once",
     done: false,
     completedDates: [],
+    recurrence: null,
+    reminder: "none",
+    reminderTime: "09:00",
     sortOrder: 0,
     createdAt: "2026-08-01T00:00:00.000Z",
     ...over,
@@ -82,6 +85,47 @@ describe("병합 규칙", () => {
     const out = mergeQueue(ops);
     expect(out).toHaveLength(1);
     expect((out[0] as { patch: Partial<Task> }).patch.done).toBe(false); // 마지막 상태
+  });
+});
+
+describe("반복 회차 체크", () => {
+  const check = (taskId: string, date: string, seq: number, done: boolean): QueueOp => ({
+    kind: "task.completion",
+    seq,
+    entityId: `${taskId}#${date}`,
+    attempts: 0,
+    taskId,
+    date,
+    done,
+  });
+
+  it("같은 회차를 여러 번 눌러도 마지막 상태만 보낸다", () => {
+    const out = mergeQueue([
+      check("t1", "2026-08-03", 1, true),
+      check("t1", "2026-08-03", 2, false),
+      check("t1", "2026-08-03", 3, true),
+    ]);
+    expect(out).toHaveLength(1);
+    expect((out[0] as { done: boolean }).done).toBe(true);
+  });
+
+  it("다른 날짜의 체크는 따로 남는다", () => {
+    const out = mergeQueue([
+      check("t1", "2026-08-03", 1, true),
+      check("t1", "2026-08-04", 2, true),
+    ]);
+    expect(out).toHaveLength(2);
+  });
+
+  it("할일을 지우면 그 할일의 회차 체크는 함께 사라진다", () => {
+    // 남겨두면 외래키 위반으로 전송이 통째로 막힌다
+    const out = mergeQueue([
+      check("t1", "2026-08-03", 1, true),
+      check("t2", "2026-08-03", 2, true),
+      remove("t1", 3),
+    ]);
+    expect(out.map((o) => o.kind)).toEqual(["task.completion", "task.delete"]);
+    expect(out[0].entityId).toBe("t2#2026-08-03");
   });
 });
 

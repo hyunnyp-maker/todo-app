@@ -2,6 +2,7 @@
 
 import { formatDayShort, weekdayKo } from "@/domain/date";
 import { toneOf } from "@/domain/palette";
+import { EMPTY_COMPLETIONS, type CompletionSet } from "@/domain/recurrence";
 import { isDoneOn, isMultiDay } from "@/domain/task";
 import type { Category, ISODate, Task } from "@/domain/types";
 
@@ -15,6 +16,7 @@ interface Props {
   isSelected: boolean;
   tasks: Task[];
   categoryById: Map<string, Category>;
+  completions?: CompletionSet;
   onSelect: (date: ISODate) => void;
 }
 
@@ -25,6 +27,7 @@ export function CalendarCell({
   isSelected,
   tasks,
   categoryById,
+  completions = EMPTY_COMPLETIONS,
   onSelect,
 }: Props) {
   const marks = tasks.slice(0, MAX_MARKS);
@@ -75,7 +78,7 @@ export function CalendarCell({
           const tone = toneOf(
             task.categoryId ? categoryById.get(task.categoryId)?.color : null,
           );
-          const dimmed = isDoneOn(task, date);
+          const dimmed = isDoneOn(task, date, completions);
           const color = isToday ? "#ffffff" : tone.dt;
 
           // 여러 날 할일은 점이 아니라 막대로 — 기간이라는 것을 형태로 알린다
@@ -121,7 +124,7 @@ export function CalendarCell({
               className="h-[4px] w-full rounded-[2px]"
               style={{
                 background: isToday ? "#ffffff" : tone.dt,
-                opacity: isDoneOn(task, date) ? 0.35 : 1,
+                opacity: isDoneOn(task, date, completions) ? 0.35 : 1,
               }}
             />
           );
@@ -142,7 +145,7 @@ export function CalendarCell({
               style={{
                 background: isToday ? "rgba(255,255,255,0.16)" : tone.bg,
                 color: isToday ? "#fff" : tone.tx,
-                opacity: isDoneOn(task, date) ? 0.45 : 1,
+                opacity: isDoneOn(task, date, completions) ? 0.45 : 1,
               }}
             >
               {task.title}

@@ -25,6 +25,9 @@ function task(over: Partial<Task> = {}): Task {
     checkMode: "once",
     done: false,
     completedDates: [],
+    recurrence: null,
+    reminder: "none",
+    reminderTime: "09:00",
     sortOrder: 0,
     createdAt: "2026-08-01T00:00:00.000Z",
     ...over,
@@ -108,7 +111,10 @@ describe("날짜별 조회", () => {
   });
 
   it("인덱스는 기간의 모든 날짜에 같은 할일을 넣는다", () => {
-    const index = buildDateIndex(tasks);
+    const index = buildDateIndex(tasks, {
+      from: "2026-07-01",
+      to: "2026-08-31",
+    });
     expect(index.get("2026-07-30")?.map((t) => t.id)).toEqual(["b"]);
     expect(index.get("2026-08-02")?.map((t) => t.id)).toEqual(["b"]);
     expect(index.get("2026-08-04")).toBeUndefined();

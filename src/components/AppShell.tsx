@@ -5,6 +5,8 @@ import { MonthCalendar } from "@/components/calendar/MonthCalendar";
 import { CategoryBand } from "@/components/category/CategoryBand";
 import { CategoryEditSheet } from "@/components/category/CategoryEditSheet";
 import { QuickAddBar } from "@/components/input/QuickAddBar";
+import { SearchBar } from "@/components/search/SearchBar";
+import { SearchResults } from "@/components/search/SearchResults";
 import { SettingsSheet } from "@/components/SettingsSheet";
 import Link from "next/link";
 import { Brand } from "@/components/Brand";
@@ -26,14 +28,20 @@ import {
   monthOf,
 } from "@/domain/date";
 import { suggestColor } from "@/domain/palette";
+import { recurrenceEndDate } from "@/domain/recurrence";
+import { DEFAULT_REMINDER_TIME } from "@/domain/reminder";
 import { filterTasks, tasksOnDate } from "@/domain/task";
 import type { Category, CategoryDeleteMode, PaletteKey, Task } from "@/domain/types";
 import { useCategories } from "@/hooks/useCategories";
 import { useCategoryMutations } from "@/hooks/useCategoryMutations";
+import { useCompletions } from "@/hooks/useCompletions";
+import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import { useOverdueTasks } from "@/hooks/useOverdueTasks";
+import { useReminders } from "@/hooks/useReminders";
 import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
+import { useTaskSearch } from "@/hooks/useTaskSearch";
 import { useTasks } from "@/hooks/useTasks";
 import { useToday } from "@/hooks/useToday";
 import { useUiStore } from "@/stores/uiStore";
@@ -62,6 +70,7 @@ export function AppShell() {
 
   const { categories } = useCategories();
   const { tasks } = useTasks(visibleMonth);
+  const { completions } = useCompletions(visibleMonth);
   const { overdue } = useOverdueTasks(today);
   const { createTask, updateTask, deleteTask, toggle, moveToToday } =
     useTaskMutations();
@@ -96,17 +105,37 @@ export function AppShell() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // 검색은 날짜 필터·달력 선택 위에 얹히는 별도 화면이다.
+  // 끄면 원래 화면이 그대로 돌아온다 — 아무 상태도 건드리지 않는다
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { active: searching, results, isLoading: searchLoading } =
+    useTaskSearch(searchOpen ? searchQuery : "");
+
+  // 알림은 권한이 있을 때만 돈다. 여기서 권한을 요청하지 않는다
+  const { granted: canNotify } = useNotificationPermission();
+  useReminders(tasks, completions, canNotify);
+
   // 필터는 달력과 리스트에 똑같이 적용된다
   const calendarTasks = useMemo(
-    () => filterTasks(tasks, { hiddenCategoryIds, hideCompleted }),
-    [tasks, hiddenCategoryIds, hideCompleted],
+    () => filterTasks(tasks, { hiddenCategoryIds, hideCompleted }, completions),
+    [tasks, hiddenCategoryIds, hideCompleted, completions],
   );
   const listTasks = useMemo(
     () =>
       selectedDate
-        ? filterTasks(tasks, { hiddenCategoryIds, hideCompleted, on: selectedDate })
+        ? filterTasks(
+            tasks,
+            { hiddenCategoryIds, hideCompleted, on: selectedDate },
+            completions,
+          )
         : [],
-    [tasks, hiddenCategoryIds, hideCompleted, selectedDate],
+    [tasks, hiddenCategoryIds, hideCompleted, selectedDate, completions],
+  );
+  // 검색 결과에도 화면의 표시 정책(카테고리 필터·완료 숨기기)을 그대로 적용한다
+  const searchResults = useMemo(
+    () => filterTasks(results, { hiddenCategoryIds, hideCompleted }, completions),
+    [results, hiddenCategoryIds, hideCompleted, completions],
   );
   // 밀린 할일에도 카테고리 필터는 적용한다. 완료 숨기기는 의미가 없다(전부 미완료)
   const overdueVisible = useMemo(
@@ -130,6 +159,9 @@ export function AppShell() {
       startDate: selectedDate!,
       endDate: selectedDate!,
       checkMode: "once",
+      recurrence: null,
+      reminder: "none",
+      reminderTime: DEFAULT_REMINDER_TIME,
     });
     setTaskSheetKey((k) => k + 1);
     setTaskSheetOpen(true);
@@ -143,29 +175,44 @@ export function AppShell() {
       startDate: task.startDate,
       endDate: task.endDate,
       checkMode: task.checkMode,
+      recurrence: task.recurrence,
+      reminder: task.reminder,
+      reminderTime: task.reminderTime || DEFAULT_REMINDER_TIME,
     });
     setTaskSheetKey((k) => k + 1);
     setTaskSheetOpen(true);
   }
 
   function saveTask(draft: TaskDraft) {
+    // 반복이 걸리면 종료일은 규칙이 정한다. 둘이 어긋나면 달력 조회에서 빠진다
+    const endDate = draft.recurrence
+      ? recurrenceEndDate(draft.recurrence)
+      : draft.endDate;
+
     if (editingTask) {
       // completedDates는 건드리지 않는다.
       // daily → once 로 바꿔도 보관해 두어야 되돌렸을 때 복원된다 (요구사항 4.4.1)
+      // 반복 회차의 체크 기록도 마찬가지로 남는다 (별도 저장이라 자동으로 보존된다)
       updateTask(editingTask.id, {
         title: draft.title,
         categoryId: draft.categoryId,
         startDate: draft.startDate,
-        endDate: draft.endDate,
-        checkMode: draft.checkMode,
+        endDate,
+        checkMode: draft.recurrence ? "once" : draft.checkMode,
+        recurrence: draft.recurrence,
+        reminder: draft.reminder,
+        reminderTime: draft.reminderTime,
       });
     } else {
       createTask({
         title: draft.title,
         categoryId: draft.categoryId,
         startDate: draft.startDate,
-        endDate: draft.endDate,
+        endDate,
         checkMode: draft.checkMode,
+        recurrence: draft.recurrence,
+        reminder: draft.reminder,
+        reminderTime: draft.reminderTime,
       });
     }
     if (draft.categoryId) setLastCategoryId(draft.categoryId);
@@ -202,14 +249,28 @@ export function AppShell() {
       <header className="flex-none px-[15px] pb-[6px] pt-[8px] lg:col-span-2 lg:px-0 lg:pt-5">
         <div className="flex items-center justify-between">
           <Brand />
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="설정"
-            className="-mr-1 px-1 text-[15px] text-ink-3"
-          >
-            ⚙
-          </button>
+          <div className="-mr-1 flex items-center">
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                setSearchOpen(true);
+              }}
+              aria-label="검색"
+              aria-expanded={searchOpen}
+              className="px-[6px] text-[15px] text-ink-3"
+            >
+              ⌕
+            </button>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              aria-label="설정"
+              className="px-1 text-[15px] text-ink-3"
+            >
+              ⚙
+            </button>
+          </div>
         </div>
 
         <div className="mt-[2px] flex items-center justify-between">
@@ -268,6 +329,7 @@ export function AppShell() {
           selectedDate={selectedDate}
           tasks={calendarTasks}
           categories={categories}
+          completions={completions}
           onSelect={selectDate}
           onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta))}
         />
@@ -296,27 +358,51 @@ export function AppShell() {
         )
       )}
 
-      <div className="flex flex-none items-center justify-between px-[15px] pb-[5px] pt-[11px] text-[11px] text-ink-3">
-        <span>
-          {formatDayShort(selectedDate)}
-          {isToday && " · 오늘"}
-        </span>
-        <span>{dayList.length}개</span>
-      </div>
+      {searchOpen ? (
+        <div className="flex-none pt-[8px]">
+          <SearchBar
+            onQueryChange={setSearchQuery}
+            onClose={() => {
+              setSearchOpen(false);
+              setSearchQuery("");
+            }}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-none items-center justify-between px-[15px] pb-[5px] pt-[11px] text-[11px] text-ink-3">
+          <span>
+            {formatDayShort(selectedDate)}
+            {isToday && " · 오늘"}
+          </span>
+          <span>{dayList.length}개</span>
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <TaskList
-          date={selectedDate}
-          tasks={listTasks}
-          categories={categories}
-          hasAnyTask={tasks.length > 0}
-          onToggle={(task) => toggle(task, selectedDate)}
-          onOpen={openEditTask}
-          onRequestDelete={setPendingDelete}
-        />
+        {searchOpen && searching ? (
+          <SearchResults
+            query={searchQuery.trim()}
+            tasks={searchResults}
+            categories={categories}
+            isLoading={searchLoading}
+            onOpen={openEditTask}
+          />
+        ) : (
+          // 검색어가 비면 원래 목록을 그대로 둔다 — 화면이 텅 비지 않는다
+          <TaskList
+            date={selectedDate}
+            tasks={listTasks}
+            categories={categories}
+            completions={completions}
+            hasAnyTask={tasks.length > 0}
+            onToggle={(task) => toggle(task, selectedDate, completions)}
+            onOpen={openEditTask}
+            onRequestDelete={setPendingDelete}
+          />
+        )}
 
         {/* 게스트 안내는 조용하게, 리스트 아래에 한 줄로 (02-personas T4) */}
-        {!user && (
+        {!searchOpen && !user && (
           <p className="px-5 pb-4 pt-1 text-[10.5px] leading-[1.6] text-ink-3">
             게스트 모드 — 이 브라우저에만 저장됩니다.{" "}
             <Link href="/login" className="underline underline-offset-2">

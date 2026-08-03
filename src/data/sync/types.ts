@@ -5,12 +5,27 @@
  * "에러"가 아니라 "대기 상태"다 — 사용자에게 재입력을 요구하지 않는다.
  */
 
-import type { Category, CategoryDeleteMode, Task } from "@/domain/types";
+import type {
+  Category,
+  CategoryDeleteMode,
+  ISODate,
+  Task,
+} from "@/domain/types";
 
 export type QueueOp =
   | { kind: "task.create"; seq: number; entityId: string; attempts: number; payload: Task }
   | { kind: "task.update"; seq: number; entityId: string; attempts: number; patch: Partial<Task> }
   | { kind: "task.delete"; seq: number; entityId: string; attempts: number }
+  /** entityId는 "taskId#date" — 같은 회차를 여러 번 눌러도 하나로 합쳐진다 */
+  | {
+      kind: "task.completion";
+      seq: number;
+      entityId: string;
+      attempts: number;
+      taskId: string;
+      date: ISODate;
+      done: boolean;
+    }
   | { kind: "category.create"; seq: number; entityId: string; attempts: number; payload: Category }
   | { kind: "category.update"; seq: number; entityId: string; attempts: number; patch: Partial<Category> }
   | {
@@ -26,6 +41,13 @@ export type NewQueueOp =
   | { kind: "task.create"; entityId: string; payload: Task }
   | { kind: "task.update"; entityId: string; patch: Partial<Task> }
   | { kind: "task.delete"; entityId: string }
+  | {
+      kind: "task.completion";
+      entityId: string;
+      taskId: string;
+      date: ISODate;
+      done: boolean;
+    }
   | { kind: "category.create"; entityId: string; payload: Category }
   | { kind: "category.update"; entityId: string; patch: Partial<Category> }
   | { kind: "category.delete"; entityId: string; mode: CategoryDeleteMode };

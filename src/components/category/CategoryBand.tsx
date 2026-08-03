@@ -242,19 +242,18 @@ export function CategoryBand({
             onDoubleClick={() => onEdit(c)}
             aria-pressed={!off}
             title="탭: 필터 · 끌기: 순서 이동 · 길게 누르기: 편집"
-            className="shrink-0 select-none overflow-hidden whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
+            className="shrink-0 select-none overflow-hidden whitespace-nowrap rounded-full px-[11px] py-[5px] text-[11px] font-bold"
             style={{
-              // 칩도 카드와 같은 규칙 — 색은 좌측 띠와 글자에만
+              // 켜진 칩은 카테고리 색을 그대로 채운다.
+              // 밴드는 이 앱에서 색이 가장 크게 보이는 곳이라, 여기서 색을 못 읽으면
+              // 카드 좌측 띠의 6px만으로 색과 이름을 잇게 된다.
+              // 꺼진 칩은 회색 — 켜짐/꺼짐이 채도로 갈린다
               ...(off
                 ? { background: "var(--line-2)", color: "var(--ink-3)" }
-                : {
-                    background: "var(--line-2)",
-                    color: tone.tx,
-                    boxShadow: `inset 3px 0 0 ${tone.dt}`,
-                  }),
+                : { background: tone.cp, color: "#ffffff" }),
               cursor: dragging ? "grabbing" : "grab",
               transform: dragging ? "scale(1.08)" : undefined,
-              boxShadow: dragging ? "0 4px 12px rgba(0,0,0,0.18)" : undefined,
+              boxShadow: dragging ? "0 4px 12px rgba(0,0,0,0.28)" : undefined,
               opacity: dragId && !dragging ? 0.55 : 1,
               transition: dragging
                 ? "transform 120ms var(--ease)"
@@ -272,15 +271,11 @@ export function CategoryBand({
           type="button"
           onClick={() => onToggle(UNCATEGORIZED_ID)}
           aria-pressed={!hidden.has(UNCATEGORIZED_ID)}
-          className="shrink-0 whitespace-nowrap rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
+          className="shrink-0 whitespace-nowrap rounded-full px-[11px] py-[5px] text-[11px] font-bold"
           style={
             hidden.has(UNCATEGORIZED_ID)
               ? { background: "var(--line-2)", color: "var(--ink-3)" }
-              : {
-                  background: "var(--line-2)",
-                  color: toneOf(null).tx,
-                  boxShadow: `inset 3px 0 0 ${toneOf(null).dt}`,
-                }
+              : { background: toneOf(null).cp, color: "#ffffff" }
           }
         >
           {UNCATEGORIZED_NAME}
@@ -291,7 +286,7 @@ export function CategoryBand({
         type="button"
         onClick={onAdd}
         aria-label="카테고리 추가"
-        className="shrink-0 rounded-full px-[10px] py-[4px] text-[11px] font-medium"
+        className="shrink-0 rounded-full px-[11px] py-[5px] text-[11px] font-bold"
         style={{ background: "var(--line-2)", color: "var(--ink-3)" }}
       >
         +

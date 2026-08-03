@@ -51,6 +51,22 @@ export function daysLeft(end: ISODate, today: ISODate): number {
   return diffDays(today, end);
 }
 
+/** 0=일 … 6=토 */
+export function weekdayIndex(iso: ISODate): number {
+  return parseISODate(iso).getDay();
+}
+
+/** 그 날짜의 일(日). "2026-08-03" → 3 */
+export function dayOfMonthOf(iso: ISODate): number {
+  return Number(iso.slice(8, 10));
+}
+
+/** 그 달의 마지막 날짜 (28~31) */
+export function lastDayOfMonth(iso: ISODate): number {
+  const [y, m] = iso.split("-").map(Number);
+  return new Date(y, m, 0).getDate();
+}
+
 // ── 월 ────────────────────────────────────────
 
 export function monthOf(iso: ISODate): ISOMonth {

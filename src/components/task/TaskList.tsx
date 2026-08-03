@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { EMPTY_COMPLETIONS, type CompletionSet } from "@/domain/recurrence";
 import { sortTasksForDate, tasksOnDate } from "@/domain/task";
 import type { Category, ISODate, Task } from "@/domain/types";
 import { TaskCard } from "./TaskCard";
@@ -9,6 +10,7 @@ interface Props {
   date: ISODate;
   tasks: Task[];
   categories: Category[];
+  completions?: CompletionSet;
   hasAnyTask: boolean;
   onToggle: (task: Task) => void;
   onOpen: (task: Task) => void;
@@ -19,6 +21,7 @@ export function TaskList({
   date,
   tasks,
   categories,
+  completions = EMPTY_COMPLETIONS,
   hasAnyTask,
   onToggle,
   onOpen,
@@ -30,8 +33,9 @@ export function TaskList({
   );
 
   const list = useMemo(
-    () => sortTasksForDate(tasksOnDate(tasks, date), date, categories),
-    [tasks, date, categories],
+    () =>
+      sortTasksForDate(tasksOnDate(tasks, date), date, categories, completions),
+    [tasks, date, categories, completions],
   );
 
   if (list.length === 0) {
@@ -59,6 +63,7 @@ export function TaskList({
             task={task}
             category={task.categoryId ? categoryById.get(task.categoryId) ?? null : null}
             on={date}
+            completions={completions}
             onToggle={onToggle}
             onOpen={onOpen}
             onRequestDelete={onRequestDelete}

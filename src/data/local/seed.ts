@@ -22,6 +22,7 @@ export function seedGuestData(): GuestData {
     schemaVersion: 1,
     categories: seedCategories(),
     tasks: [],
+    completions: [],
     migrationAsked: false,
   };
 }

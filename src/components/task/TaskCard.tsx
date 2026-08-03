@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toneOf } from "@/domain/palette";
+import { EMPTY_COMPLETIONS, type CompletionSet } from "@/domain/recurrence";
 import { isDoneOn, taskDetailText } from "@/domain/task";
 import type { Category, ISODate, Task } from "@/domain/types";
 
@@ -9,6 +10,8 @@ interface Props {
   task: Task;
   category: Category | null;
   on: ISODate;
+  /** 반복 일정의 완료는 본체가 아니라 여기에 있다 */
+  completions?: CompletionSet;
   onToggle: (task: Task) => void;
   onOpen: (task: Task) => void;
   onRequestDelete: (task: Task) => void;
@@ -21,12 +24,13 @@ export function TaskCard({
   task,
   category,
   on,
+  completions = EMPTY_COMPLETIONS,
   onToggle,
   onOpen,
   onRequestDelete,
 }: Props) {
   const tone = toneOf(category?.color ?? null);
-  const done = isDoneOn(task, on);
+  const done = isDoneOn(task, on, completions);
   const detail = taskDetailText(task, on);
   const categoryName = category?.name ?? "미분류";
 
@@ -109,7 +113,9 @@ export function TaskCard({
           type="button"
           role="checkbox"
           aria-checked={done}
-          aria-label={`${categoryName} · ${task.title}${done ? " · 완료됨" : ""}`}
+          aria-label={`${categoryName} · ${task.title}${
+            detail ? ` · ${detail}` : ""
+          }${done ? " · 완료됨" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             handleToggle();

@@ -8,25 +8,53 @@
  */
 
 import { covers, datesBetween, dayCount, dayIndex } from "./date";
-import type { Category, ISODate, Task } from "./types";
+import {
+  describeRecurrence,
+  EMPTY_COMPLETIONS,
+  isCompletedOn,
+  ruleDatesInRange,
+  ruleOccursOn,
+  type CompletionSet,
+} from "./recurrence";
+import type { Category, DateRange, ISODate, Task } from "./types";
 
 // ── 완료 판정 ──────────────────────────────────
 
+/** 반복 일정은 기간형이 아니다 — endDate가 먼 미래라도 하루짜리로 다룬다 */
 export function isMultiDay(task: Task): boolean {
+  if (task.recurrence) return false;
   return task.startDate !== task.endDate;
 }
 
 /** 기간 전체가 완료되었는가 */
 export function isTaskComplete(task: Task): boolean {
+  // 반복 일정에 "전체 완료"는 없다. 종료일이 없을 수도 있다
+  if (task.recurrence) return false;
   if (task.checkMode === "once") return task.done;
   const total = dayCount(task.startDate, task.endDate);
   return countCompleted(task) >= total;
 }
 
-/** 특정 날짜에 대해 체크되어 있는가 */
-export function isDoneOn(task: Task, on: ISODate): boolean {
+/**
+ * 특정 날짜에 대해 체크되어 있는가.
+ *
+ * 반복 일정만 세 번째 인자를 쓴다 — 완료가 본체가 아니라 별도 기록에 있기 때문.
+ * 넘기지 않으면 미완료로 읽히므로, 반복을 다루는 화면은 반드시 함께 넘긴다.
+ */
+export function isDoneOn(
+  task: Task,
+  on: ISODate,
+  completions: CompletionSet = EMPTY_COMPLETIONS,
+): boolean {
+  if (task.recurrence) return isCompletedOn(completions, task.id, on);
   if (task.checkMode === "once") return task.done;
   return task.completedDates.includes(on);
+}
+
+/** 그 날짜에 이 할일이 뜨는가 — 반복이면 규칙으로, 아니면 기간으로 */
+export function occursOn(task: Task, on: ISODate): boolean {
+  if (task.recurrence) return ruleOccursOn(task.recurrence, task.startDate, on);
+  return covers(task.startDate, task.endDate, on);
 }
 
 /** 지속형에서 실제 기간 안에 있는 체크만 센다.
@@ -63,24 +91,41 @@ export function toggleCompletedDate(task: Task, on: ISODate): ISODate[] {
 
 // ── 날짜별 조회 ────────────────────────────────
 
-/** 그 날짜에 걸쳐 있는 할일. 기간 중간에 낀 날짜도 포함된다 */
+/** 그 날짜에 걸쳐 있는 할일. 기간 중간에 낀 날짜도, 반복 회차도 포함된다 */
 export function tasksOnDate(tasks: readonly Task[], on: ISODate): Task[] {
-  return tasks.filter((t) => covers(t.startDate, t.endDate, on));
+  return tasks.filter((t) => occursOn(t, on));
 }
 
 /**
  * 날짜 → 할일 목록 인덱스.
  * 달력은 42칸을 그리므로, 칸마다 filter를 돌리면 O(42 × N)이 된다.
  * 한 번만 순회해 Map을 만든다 (06-architecture 6장).
+ *
+ * range가 필수인 이유: 종료 없는 반복 일정의 endDate는 9999-12-31이다.
+ * 범위 없이 펼치면 300만 일을 순회한다.
  */
-export function buildDateIndex(tasks: readonly Task[]): Map<ISODate, Task[]> {
+export function buildDateIndex(
+  tasks: readonly Task[],
+  range: DateRange,
+): Map<ISODate, Task[]> {
   const index = new Map<ISODate, Task[]>();
+  const push = (d: ISODate, task: Task) => {
+    const bucket = index.get(d);
+    if (bucket) bucket.push(task);
+    else index.set(d, [task]);
+  };
+
   for (const task of tasks) {
-    for (const d of datesBetween(task.startDate, task.endDate)) {
-      const bucket = index.get(d);
-      if (bucket) bucket.push(task);
-      else index.set(d, [task]);
+    if (task.recurrence) {
+      for (const d of ruleDatesInRange(task.recurrence, task.startDate, range)) {
+        push(d, task);
+      }
+      continue;
     }
+    const from = task.startDate > range.from ? task.startDate : range.from;
+    const to = task.endDate < range.to ? task.endDate : range.to;
+    if (from > to) continue;
+    for (const d of datesBetween(from, to)) push(d, task);
   }
   return index;
 }
@@ -106,15 +151,17 @@ export function sortTasksForDate(
   tasks: readonly Task[],
   on: ISODate,
   categories: readonly Category[] = [],
+  completions: CompletionSet = EMPTY_COMPLETIONS,
 ): Task[] {
   const order = new Map(categories.map((c) => [c.id, c.sortOrder]));
   return [...tasks].sort((a, b) => {
-    const doneA = isDoneOn(a, on) ? 1 : 0;
-    const doneB = isDoneOn(b, on) ? 1 : 0;
+    const doneA = isDoneOn(a, on, completions) ? 1 : 0;
+    const doneB = isDoneOn(b, on, completions) ? 1 : 0;
     if (doneA !== doneB) return doneA - doneB;
 
-    const dailyA = a.checkMode === "daily" ? 1 : 0;
-    const dailyB = b.checkMode === "daily" ? 1 : 0;
+    // 매일 등장하는 것(지속형·반복)은 뒤로. 앞에 두면 그날만의 할일을 밀어낸다
+    const dailyA = a.recurrence || a.checkMode === "daily" ? 1 : 0;
+    const dailyB = b.recurrence || b.checkMode === "daily" ? 1 : 0;
     if (dailyA !== dailyB) return dailyA - dailyB;
 
     const catA = categoryRank(a, order);
@@ -145,13 +192,16 @@ const UNCATEGORIZED = "__none__";
 export function filterTasks(
   tasks: readonly Task[],
   filter: TaskFilter,
+  completions: CompletionSet = EMPTY_COMPLETIONS,
 ): Task[] {
   const hidden = new Set(filter.hiddenCategoryIds);
   return tasks.filter((t) => {
     const key = t.categoryId ?? UNCATEGORIZED;
     if (hidden.has(key)) return false;
     if (!filter.hideCompleted) return true;
-    return filter.on ? !isDoneOn(t, filter.on) : !isTaskComplete(t);
+    return filter.on
+      ? !isDoneOn(t, filter.on, completions)
+      : !isTaskComplete(t);
   });
 }
 
@@ -165,7 +215,9 @@ export function filterTasks(
  */
 export function overdueTasks(tasks: readonly Task[], today: ISODate): Task[] {
   return tasks.filter(
-    (t) => t.checkMode === "once" && !t.done && t.endDate < today,
+    (t) =>
+      // 반복 일정도 같은 이유로 제외한다. 어제 못 한 '매일 운동'은 밀린 것이 아니다
+      !t.recurrence && t.checkMode === "once" && !t.done && t.endDate < today,
   );
 }
 
@@ -179,6 +231,8 @@ export interface TaskMeta {
 }
 
 export function taskDetailText(task: Task, on: ISODate): string | null {
+  // 반복 일정은 진행률이 아니라 규칙 자체가 정보다
+  if (task.recurrence) return describeRecurrence(task.recurrence);
   if (task.checkMode === "daily") {
     const { done, total } = dailyProgress(task);
     return `${done}/${total}일`;

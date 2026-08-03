@@ -20,6 +20,9 @@ async function applyOp(repo: TodoRepository, op: QueueOp): Promise<void> {
     case "task.delete":
       await repo.deleteTask(op.entityId);
       return;
+    case "task.completion":
+      await repo.setCompletion(op.taskId, op.date, op.done);
+      return;
     case "category.create":
       await repo.createCategory(op.payload);
       return;

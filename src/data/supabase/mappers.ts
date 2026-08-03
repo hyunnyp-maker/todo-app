@@ -5,7 +5,13 @@
  */
 
 import { normalizePaletteKey } from "@/domain/palette";
-import type { Category, Task } from "@/domain/types";
+import { normalizeRecurrence, recurrenceEndDate } from "@/domain/recurrence";
+import {
+  DEFAULT_REMINDER_TIME,
+  isReminderOffset,
+  normalizeReminderTime,
+} from "@/domain/reminder";
+import type { Category, Task, TaskCompletion } from "@/domain/types";
 
 export interface CategoryRow {
   id: string;
@@ -24,8 +30,20 @@ export interface TaskRow {
   check_mode: string;
   done: boolean;
   completed_dates: string[] | null;
+  recurrence: unknown;
+  reminder: string | null;
+  reminder_time: string | null;
   sort_order: number;
   created_at: string;
+}
+
+export interface CompletionRow {
+  task_id: string;
+  date: string;
+}
+
+export function toCompletion(row: CompletionRow): TaskCompletion {
+  return { taskId: row.task_id, date: row.date };
 }
 
 export function toCategory(row: CategoryRow): Category {
@@ -48,16 +66,24 @@ export function fromCategory(category: Category) {
 }
 
 export function toTask(row: TaskRow): Task {
+  const recurrence = normalizeRecurrence(row.recurrence);
   return {
     id: row.id,
     categoryId: row.category_id,
     title: row.title,
     memo: row.memo ?? undefined,
     startDate: row.start_date,
-    endDate: row.end_date,
+    // 규칙이 있으면 종료일의 진실은 규칙 쪽이다
+    endDate: recurrence ? recurrenceEndDate(recurrence) : row.end_date,
     checkMode: row.check_mode === "daily" ? "daily" : "once",
     done: row.done,
     completedDates: row.completed_dates ?? [],
+    recurrence,
+    reminder: isReminderOffset(row.reminder) ? row.reminder : "none",
+    reminderTime:
+      row.reminder_time === null
+        ? DEFAULT_REMINDER_TIME
+        : normalizeReminderTime(row.reminder_time),
     sortOrder: row.sort_order,
     createdAt: row.created_at,
   };
@@ -74,6 +100,9 @@ export function fromTask(task: Task) {
     check_mode: task.checkMode,
     done: task.done,
     completed_dates: task.completedDates,
+    recurrence: task.recurrence,
+    reminder: task.reminder,
+    reminder_time: task.reminderTime,
     sort_order: task.sortOrder,
   };
 }
@@ -89,6 +118,9 @@ export function fromTaskPatch(patch: Partial<Task>) {
   if (patch.checkMode !== undefined) row.check_mode = patch.checkMode;
   if (patch.done !== undefined) row.done = patch.done;
   if (patch.completedDates !== undefined) row.completed_dates = patch.completedDates;
+  if (patch.recurrence !== undefined) row.recurrence = patch.recurrence;
+  if (patch.reminder !== undefined) row.reminder = patch.reminder;
+  if (patch.reminderTime !== undefined) row.reminder_time = patch.reminderTime;
   if (patch.sortOrder !== undefined) row.sort_order = patch.sortOrder;
   return row;
 }

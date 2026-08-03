@@ -19,6 +19,19 @@ export interface MigrationSummary {
   tasks: number;
 }
 
+/** 이관 중 id가 새로 발급되므로, 완료 기록도 새 id로 옮겨야 짝이 맞는다 */
+async function migrateCompletions(
+  repo: TodoRepository,
+  guest: GuestData,
+  taskIdMap: Map<string, string>,
+) {
+  for (const record of guest.completions) {
+    const mapped = taskIdMap.get(record.taskId);
+    if (!mapped) continue;
+    await repo.setCompletion(mapped, record.date, true);
+  }
+}
+
 export function readGuestData(): GuestData {
   return loadGuestData();
 }
@@ -71,6 +84,7 @@ export async function migrateGuestData(
   }
 
   let createdTasks = 0;
+  const taskIdMap = new Map<string, string>();
   for (const guestTask of guest.tasks) {
     const task: Task = {
       ...guestTask,
@@ -79,14 +93,18 @@ export async function migrateGuestData(
       categoryId: guestTask.categoryId ? (idMap.get(guestTask.categoryId) ?? null) : null,
     };
     await repo.createTask(task);
+    taskIdMap.set(guestTask.id, task.id);
     createdTasks += 1;
   }
+
+  await migrateCompletions(repo, guest, taskIdMap);
 
   // 여기까지 왔으면 전부 성공했다
   saveGuestData({
     schemaVersion: 1,
     categories: [],
     tasks: [],
+    completions: [],
     migrationAsked: true,
   });
 

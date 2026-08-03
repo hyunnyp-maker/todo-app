@@ -53,11 +53,25 @@ function mergePair(prev: QueueOp, next: QueueOp): QueueOp | null {
 /**
  * 큐 전체를 정규화한다.
  * 같은 entityId의 연산은 첫 등장 위치에서 하나로 합쳐진다.
+ *
+ * 반복 회차 체크(task.completion)는 entityId가 "taskId#date"라 회차마다 따로 남고,
+ * 같은 회차를 여러 번 눌러도 mergePair의 기본 규칙(나중 것이 이긴다)으로 하나가 된다.
  */
 export function mergeQueue(ops: readonly QueueOp[]): QueueOp[] {
   const result: QueueOp[] = [];
 
   for (const op of ops) {
+    // 할일을 지우면 그 할일의 회차 체크는 보낼 곳이 없어진다.
+    // 남겨두면 외래키 위반으로 전송이 통째로 막힌다
+    if (op.kind === "task.delete") {
+      for (let i = result.length - 1; i >= 0; i--) {
+        const prev = result[i];
+        if (prev.kind === "task.completion" && prev.taskId === op.entityId) {
+          result.splice(i, 1);
+        }
+      }
+    }
+
     const index = result.findIndex((o) => o.entityId === op.entityId);
     if (index < 0) {
       result.push(op);
