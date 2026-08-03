@@ -215,6 +215,23 @@ export function SettingsSheet({
         </div>
       </div>
 
+      {/* 음성 인식의 한계는 코드로 덮을 수 없다. 미리 말해 두는 편이 낫다 */}
+      <div className="mt-[14px] border-t border-line pt-[12px]">
+        <p className="text-[13px]">음성으로 추가</p>
+        <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+          하단 입력 바의 마이크를 누르고 &lsquo;내일 오후 3시 병원 예약&rsquo;처럼
+          말하면 제목·날짜·시간·반복을 분석해 확인 화면을 띄웁니다. 저장을 누르기
+          전까지는 아무것도 만들어지지 않습니다.
+        </p>
+        <ul className="mt-[8px] flex list-disc flex-col gap-[3px] pl-[16px] text-[10.5px] leading-[1.6] text-ink-3">
+          <li>Chrome·Edge에서 동작합니다. Firefox는 지원하지 않습니다.</li>
+          <li>iOS·Safari는 지원 방식이 달라 중간 결과가 보이지 않을 수 있습니다.</li>
+          <li>인식은 네트워크를 씁니다. 연결이 없으면 실패합니다.</li>
+          <li>말한 내용이 항상 정확히 옮겨지지는 않습니다. 저장 전에 확인해 주세요.</li>
+          <li>마이크 권한은 마이크 버튼을 누를 때만 요청합니다.</li>
+        </ul>
+      </div>
+
       <BackupSection />
 
       {/* 설치 유도 팝업은 띄우지 않는다 (E2). 설정에 들어온 사람에게만 보여준다 */}

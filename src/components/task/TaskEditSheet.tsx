@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { toneOf } from "@/domain/palette";
 import { DEFAULT_REMINDER_TIME } from "@/domain/reminder";
+import { taskDraftError } from "@/domain/task";
 import type {
   Category,
   CheckMode,
@@ -63,10 +64,10 @@ export function TaskEditSheet({
   );
 
   const isRecurring = draft.recurrence !== null;
-  const titleOk = draft.title.trim() !== "";
-  // 반복이면 종료일은 규칙이 들고 있다. 여기서 볼 endDate는 없다
+  // 검증은 도메인이 한 벌만 갖는다. 음성 확인 화면도 같은 함수를 쓴다
+  const error = taskDraftError(draft);
   const rangeOk = isRecurring || draft.endDate >= draft.startDate;
-  const canSave = titleOk && rangeOk;
+  const canSave = error === null;
 
   function setRange(on: boolean) {
     setIsRange(on);

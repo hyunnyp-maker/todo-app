@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MonthCalendar } from "@/components/calendar/MonthCalendar";
 import { CategoryBand } from "@/components/category/CategoryBand";
 import { CategoryEditSheet } from "@/components/category/CategoryEditSheet";
@@ -17,6 +17,7 @@ import { TaskEditSheet, type TaskDraft } from "@/components/task/TaskEditSheet";
 import { TaskList } from "@/components/task/TaskList";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { SearchIcon, SettingsIcon } from "@/components/ui/icons";
+import { VoiceConfirmSheet } from "@/components/voice/VoiceConfirmSheet";
 import {
   countTasksIn,
   hasUncategorized,
@@ -33,6 +34,7 @@ import { recurrenceEndDate } from "@/domain/recurrence";
 import { DEFAULT_REMINDER_TIME } from "@/domain/reminder";
 import { filterTasks, tasksOnDate } from "@/domain/task";
 import type { Category, CategoryDeleteMode, PaletteKey, Task } from "@/domain/types";
+import { parseVoiceTodo, type ParsedVoiceTodo } from "@/domain/voiceParse";
 import { useCategories } from "@/hooks/useCategories";
 import { useCategoryMutations } from "@/hooks/useCategoryMutations";
 import { useCompletions } from "@/hooks/useCompletions";
@@ -107,6 +109,12 @@ export function AppShell() {
   const [categorySheetKey, setCategorySheetKey] = useState(0);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // 음성 인식 결과는 확인 화면을 거쳐야 저장된다. 여기 있는 동안은 아무것도 만들어지지 않는다
+  const [voiceParsed, setVoiceParsed] = useState<ParsedVoiceTodo | null>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceKey, setVoiceKey] = useState(0);
+  const voiceStartRef = useRef<(() => void) | null>(null);
 
   // 검색은 날짜 필터·달력 선택 위에 얹히는 별도 화면이다.
   // 끄면 원래 화면이 그대로 돌아온다 — 아무 상태도 건드리지 않는다
@@ -186,17 +194,21 @@ export function AppShell() {
     setTaskSheetOpen(true);
   }
 
-  function saveTask(draft: TaskDraft) {
+  /**
+   * 실제 저장. 상세 시트와 음성 확인 화면이 같은 이 함수를 부른다.
+   * 음성 전용 저장 경로를 따로 만들면 검증과 후처리가 둘로 갈라진다.
+   */
+  function commitTask(draft: TaskDraft, editing: Task | null) {
     // 반복이 걸리면 종료일은 규칙이 정한다. 둘이 어긋나면 달력 조회에서 빠진다
     const endDate = draft.recurrence
       ? recurrenceEndDate(draft.recurrence)
       : draft.endDate;
 
-    if (editingTask) {
+    if (editing) {
       // completedDates는 건드리지 않는다.
       // daily → once 로 바꿔도 보관해 두어야 되돌렸을 때 복원된다 (요구사항 4.4.1)
       // 반복 회차의 체크 기록도 마찬가지로 남는다 (별도 저장이라 자동으로 보존된다)
-      updateTask(editingTask.id, {
+      updateTask(editing.id, {
         title: draft.title,
         categoryId: draft.categoryId,
         startDate: draft.startDate,
@@ -219,8 +231,27 @@ export function AppShell() {
       });
     }
     if (draft.categoryId) setLastCategoryId(draft.categoryId);
+  }
+
+  function saveTask(draft: TaskDraft) {
+    commitTask(draft, editingTask);
     setTaskSheetOpen(false);
     setEditingTask(null);
+  }
+
+  // ── 음성 입력 ────────────────────────────────
+  // 인식 결과를 바로 저장하지 않는다. 파싱 결과를 확인 화면에 올리고 거기서 끝난다
+
+  function handleVoiceResult(text: string) {
+    setVoiceParsed(parseVoiceTodo(text, new Date()));
+    setVoiceKey((k) => k + 1);
+    setVoiceOpen(true);
+  }
+
+  function saveVoiceTask(draft: TaskDraft) {
+    commitTask(draft, null);
+    setVoiceOpen(false);
+    setVoiceParsed(null);
   }
 
   function openCategory(category: Category | null) {
@@ -430,8 +461,31 @@ export function AppShell() {
           })
         }
         onOpenDetail={openNewTask}
+        onVoiceResult={handleVoiceResult}
+        startRef={voiceStartRef}
       />
       </div>
+
+      {voiceParsed && (
+        <VoiceConfirmSheet
+          key={voiceKey}
+          open={voiceOpen}
+          parsed={voiceParsed}
+          fallbackDate={selectedDate}
+          categoryId={activeCategoryId}
+          onClose={() => {
+            setVoiceOpen(false);
+            setVoiceParsed(null);
+          }}
+          onRetry={() => {
+            setVoiceOpen(false);
+            setVoiceParsed(null);
+            // 시트가 닫힌 뒤에 마이크를 켠다. 같은 프레임에 켜면 포커스가 엉킨다
+            window.setTimeout(() => voiceStartRef.current?.(), 0);
+          }}
+          onSave={saveVoiceTask}
+        />
+      )}
 
       {taskDraft && (
         <TaskEditSheet

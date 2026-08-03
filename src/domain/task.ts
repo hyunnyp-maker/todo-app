@@ -16,7 +16,41 @@ import {
   ruleOccursOn,
   type CompletionSet,
 } from "./recurrence";
-import type { Category, DateRange, ISODate, Task } from "./types";
+import type {
+  Category,
+  DateRange,
+  ISODate,
+  RecurrenceRule,
+  Task,
+} from "./types";
+
+// ── 초안 검증 ──────────────────────────────────
+
+/** 저장 전에 확인해야 하는 최소한. 상세 시트와 음성 확인 화면이 같은 규칙을 쓴다 */
+export interface TaskDraftShape {
+  title: string;
+  startDate: ISODate;
+  endDate: ISODate;
+  recurrence: RecurrenceRule | null;
+}
+
+/**
+ * 저장할 수 없는 이유. 저장 가능하면 null.
+ *
+ * 검증이 두 곳에 따로 있으면 반드시 어긋난다 — 한쪽에서 막은 것이 다른 쪽에서 통과한다.
+ */
+export function taskDraftError(draft: TaskDraftShape): string | null {
+  if (draft.title.trim() === "") return "제목을 입력해 주세요";
+  // 반복이면 종료일은 규칙이 들고 있다. endDate는 규칙에서 파생된 값이라 비교 대상이 아니다
+  if (!draft.recurrence && draft.endDate < draft.startDate) {
+    return "종료일이 시작일보다 앞설 수 없습니다";
+  }
+  return null;
+}
+
+export function isSavableTaskDraft(draft: TaskDraftShape): boolean {
+  return taskDraftError(draft) === null;
+}
 
 // ── 완료 판정 ──────────────────────────────────
 
