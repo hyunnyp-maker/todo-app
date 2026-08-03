@@ -103,6 +103,11 @@ export function QuickAddBar({
           placeholder={placeholder}
           aria-label="할일 추가"
           enterKeyHint="done"
+          // 자동 대문자·자동수정은 할일 제목에 방해만 된다
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          // 글자 크기는 globals.css가 터치 기기에서 16px로 올린다 (iOS 자동 확대 방지)
           className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-ink-3"
         />
         <button
