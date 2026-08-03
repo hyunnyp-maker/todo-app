@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Brand } from "@/components/Brand";
 import { Sheet } from "@/components/ui/Sheet";
 import { getSupabaseClient } from "@/data/supabase/client";
 import { useSession } from "@/hooks/useSession";
@@ -84,7 +85,7 @@ export function SettingsSheet({
             <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
               이 브라우저에만 저장됩니다.
               {isConfigured
-                ? " 로그인하면 다른 기기에서도 이어서 쓸 수 있어요."
+                ? " 가입하면 이메일 계정 기준으로 저장돼, 다른 기기에서도 이어서 쓸 수 있어요."
                 : " (Supabase를 설정하면 로그인이 켜집니다)"}
             </p>
             {isConfigured && (
@@ -105,6 +106,10 @@ export function SettingsSheet({
           ? `서버에 보내지 못한 변경 ${pending}건이 대기 중입니다. 온라인이 되면 자동으로 전송됩니다.`
           : "오프라인에서도 쓸 수 있습니다. 연결이 돌아오면 자동으로 맞춰집니다."}
       </p>
+
+      <div className="mt-[16px] border-t border-line pt-[12px] text-center">
+        <Brand />
+      </div>
     </Sheet>
   );
 }

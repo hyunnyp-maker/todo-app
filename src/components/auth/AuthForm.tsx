@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Brand } from "@/components/Brand";
 import { getSupabaseClient } from "@/data/supabase/client";
 import { isSupabaseConfigured, siteOrigin } from "@/lib/env";
 
@@ -72,21 +73,16 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     if (ok) setNotice("재설정 메일을 보냈습니다.");
   }
 
-  async function google() {
-    if (!db) return;
-    await run(() =>
-      db.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${siteOrigin()}/auth/callback` },
-      }),
-    );
-  }
-
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col justify-center px-6 py-10">
-      <h1 className="text-[20px] font-bold tracking-tight">{TITLES[mode]}</h1>
+      <Brand size="lg" />
+      <h1 className="mt-[18px] text-[17px] font-bold tracking-tight">
+        {TITLES[mode]}
+      </h1>
       <p className="mt-[6px] text-[12.5px] leading-[1.6] text-ink-3">
-        로그인하면 다른 기기에서도 이어서 쓸 수 있어요.
+        지금은 <b className="font-medium text-ink-2">게스트 모드</b>라 이 브라우저에만
+        저장됩니다. 가입하면 <b className="font-medium text-ink-2">이메일 계정</b> 기준으로
+        저장돼, 다른 기기에서도 이어서 쓸 수 있어요.
       </p>
 
       {!isSupabaseConfigured && (
@@ -131,24 +127,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           {busy ? "처리 중…" : TITLES[mode]}
         </button>
       </form>
-
-      {mode !== "reset" && (
-        <>
-          <div className="my-[16px] flex items-center gap-3 text-[11px] text-ink-3">
-            <span className="h-px flex-1 bg-line" />
-            또는
-            <span className="h-px flex-1 bg-line" />
-          </div>
-          <button
-            type="button"
-            onClick={google}
-            disabled={busy || !isSupabaseConfigured}
-            className="w-full rounded-[10px] border border-line py-[12px] text-[13.5px] font-medium disabled:opacity-40"
-          >
-            Google로 계속하기
-          </button>
-        </>
-      )}
 
       {error && (
         <p className="mt-[14px] text-[12px]" style={{ color: "var(--danger)" }}>

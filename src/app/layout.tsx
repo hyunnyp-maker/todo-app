@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "할일",
-  description: "색으로 구분하는 달력 할일 앱",
+  title: "Myquence",
+  description: "색으로 구분하는 달력 할일 앱 · by hyunnyp",
 };
 
 export const viewport: Viewport = {

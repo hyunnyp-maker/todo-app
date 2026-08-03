@@ -6,6 +6,8 @@ import { CategoryBand } from "@/components/category/CategoryBand";
 import { CategoryEditSheet } from "@/components/category/CategoryEditSheet";
 import { QuickAddBar } from "@/components/input/QuickAddBar";
 import { SettingsSheet } from "@/components/SettingsSheet";
+import Link from "next/link";
+import { Brand } from "@/components/Brand";
 import { MigrationPrompt } from "@/components/MigrationPrompt";
 import { SyncBadge } from "@/components/sync/SyncBadge";
 import { OverdueFold } from "@/components/task/OverdueFold";
@@ -29,6 +31,7 @@ import type { Category, CategoryDeleteMode, PaletteKey, Task } from "@/domain/ty
 import { useCategories } from "@/hooks/useCategories";
 import { useCategoryMutations } from "@/hooks/useCategoryMutations";
 import { useOverdueTasks } from "@/hooks/useOverdueTasks";
+import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { useTasks } from "@/hooks/useTasks";
@@ -61,6 +64,7 @@ export function AppShell() {
   const { createTask, updateTask, deleteTask, toggle, moveToToday } =
     useTaskMutations();
   const { pending, lastError, dismissError } = useSyncQueue();
+  const { user } = useSession();
   const {
     createCategory,
     renameCategory,
@@ -192,32 +196,44 @@ export function AppShell() {
 
   return (
     <div className="mx-auto flex h-dvh w-full max-w-[520px] flex-col">
-      <header className="flex flex-none items-center justify-between px-[15px] pb-[7px] pt-[9px]">
-        <div className="flex items-center gap-[6px]">
-          <h1 className="text-[17px] font-bold tracking-tight">
-            {formatMonthTitle(visibleMonth)}
-          </h1>
-          {/* 데스크톱에는 스와이프가 없다 */}
-          <div className="flex items-center text-ink-3">
-            <button
-              type="button"
-              onClick={() => goToMonth(addMonths(visibleMonth, -1))}
-              aria-label="이전 달"
-              className="px-[6px] py-[2px] text-[13px]"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              onClick={() => goToMonth(addMonths(visibleMonth, 1))}
-              aria-label="다음 달"
-              className="px-[6px] py-[2px] text-[13px]"
-            >
-              ›
-            </button>
-          </div>
+      <header className="flex-none px-[15px] pb-[6px] pt-[8px]">
+        <div className="flex items-center justify-between">
+          <Brand />
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="설정"
+            className="-mr-1 px-1 text-[15px] text-ink-3"
+          >
+            ⚙
+          </button>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="mt-[2px] flex items-center justify-between">
+          <div className="flex items-center gap-[6px]">
+            <h2 className="text-[17px] font-bold tracking-tight">
+              {formatMonthTitle(visibleMonth)}
+            </h2>
+            {/* 데스크톱에는 스와이프가 없다 */}
+            <div className="flex items-center text-ink-3">
+              <button
+                type="button"
+                onClick={() => goToMonth(addMonths(visibleMonth, -1))}
+                aria-label="이전 달"
+                className="px-[6px] py-[2px] text-[13px]"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => goToMonth(addMonths(visibleMonth, 1))}
+                aria-label="다음 달"
+                className="px-[6px] py-[2px] text-[13px]"
+              >
+                ›
+              </button>
+            </div>
+          </div>
           {!isToday && (
             <button
               type="button"
@@ -227,14 +243,6 @@ export function AppShell() {
               오늘
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="설정"
-            className="px-1 text-[15px] text-ink-3"
-          >
-            ⚙
-          </button>
         </div>
       </header>
 
@@ -298,6 +306,17 @@ export function AppShell() {
           onOpen={openEditTask}
           onRequestDelete={setPendingDelete}
         />
+
+        {/* 게스트 안내는 조용하게, 리스트 아래에 한 줄로 (02-personas T4) */}
+        {!user && (
+          <p className="px-5 pb-4 pt-1 text-[10.5px] leading-[1.6] text-ink-3">
+            게스트 모드 — 이 브라우저에만 저장됩니다.{" "}
+            <Link href="/login" className="underline underline-offset-2">
+              가입
+            </Link>
+            하면 이메일 계정 기준으로 저장돼, 다른 기기에서도 이어서 쓸 수 있어요.
+          </p>
+        )}
       </div>
 
       <QuickAddBar
