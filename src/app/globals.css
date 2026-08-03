@@ -185,6 +185,24 @@ body {
   animation: check-spread var(--dur-check) var(--ease) forwards;
 }
 
+/* 녹음 중 표시. 깜빡임이 아니라 숨쉬듯 옅어졌다 진해진다 —
+   깜빡이는 빨간 점은 시선을 계속 뺏어 말하는 데 방해가 된다 */
+@keyframes mic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+
+.mic-pulse {
+  animation: mic-pulse 1.4s var(--ease) infinite;
+}
+
 /* 모션 축소 존중 (E3) */
 @media (prefers-reduced-motion: reduce) {
   *,

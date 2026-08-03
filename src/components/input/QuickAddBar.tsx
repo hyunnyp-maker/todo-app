@@ -7,6 +7,13 @@ import { formatDayShort } from "@/domain/date";
 import type { Category, ISODate } from "@/domain/types";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
+/** 파서가 실제로 알아듣는 형태에서 골랐다. 못 알아듣는 예시를 보여 주면 신뢰가 깨진다 */
+const VOICE_EXAMPLES = [
+  "내일 오후 3시 병원 예약",
+  "매주 월요일 오전 10시 팀 회의",
+  "8월 10일까지 보고서 제출",
+] as const;
+
 interface Props {
   date: ISODate;
   isToday: boolean;
@@ -124,15 +131,47 @@ export function QuickAddBar({
         <p
           role="status"
           aria-live="polite"
-          className="px-[15px] pt-[6px] text-[11px] leading-[1.5]"
+          className="flex items-center gap-[6px] px-[15px] pt-[6px] text-[11px] leading-[1.5]"
           style={{ color: speech.error ? "var(--danger)" : "var(--ink-3)" }}
         >
+          {speech.listening && !speech.error && (
+            <span
+              aria-hidden
+              className="mic-pulse size-[7px] shrink-0 rounded-full"
+              style={{ background: "var(--danger)" }}
+            />
+          )}
           {speech.error
             ? speech.error
             : speech.listening
-              ? "● 듣는 중… 다시 누르면 멈춥니다"
+              ? "듣는 중… 다시 누르면 멈춥니다"
               : "이 브라우저는 음성 인식을 지원하지 않습니다. 직접 입력해 주세요."}
         </p>
+      )}
+
+      {/* 말을 시작하기 전에만 예시를 보여 준다.
+          무엇을 말해야 할지 모르면 마이크는 눌러 봐도 한 번 쓰고 만다.
+          말이 들어오는 순간 사라져 중간 결과를 가리지 않는다 */}
+      {speech.listening && speech.transcript === "" && (
+        <div className="px-[15px] pt-[6px]">
+          <p className="text-[10.5px] font-semibold text-ink-2">
+            이렇게 말해 보세요
+          </p>
+          <ul className="mt-[4px] flex flex-col gap-[3px]">
+            {VOICE_EXAMPLES.map((example) => (
+              <li
+                key={example}
+                className="rounded-[8px] px-[9px] py-[5px] text-[11.5px] leading-[1.4]"
+                style={{ background: "var(--line-2)", color: "var(--ink-2)" }}
+              >
+                {example}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-[5px] text-[10px] leading-[1.5] text-ink-3">
+            날짜 · 시간 · 반복을 나눠 읽습니다. 저장 전에 확인 화면이 뜹니다.
+          </p>
+        </div>
       )}
 
       <div className="px-[11px] py-[8px]">
