@@ -38,9 +38,15 @@ const MAX_SCAN_DAYS = 400;
 export const RECURRENCE_LABELS: Record<RecurrenceType, string> = {
   daily: "매일",
   weekdays: "평일",
+  weekend: "주말",
   weekly: "매주",
   monthly: "매월",
+  yearly: "매년",
 };
+
+/** 평일 = 월~금, 주말 = 토·일. 화면과 파서가 같은 값을 본다 */
+export const WEEKDAY_DAYS = [1, 2, 3, 4, 5] as const;
+export const WEEKEND_DAYS = [0, 6] as const;
 
 const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"] as const;
 
@@ -55,11 +61,21 @@ function matchesPattern(rule: RecurrenceRule, on: ISODate): boolean {
       const d = weekdayIndex(on);
       return d >= 1 && d <= 5;
     }
+    case "weekend": {
+      const d = weekdayIndex(on);
+      return d === 0 || d === 6;
+    }
     case "weekly":
       return rule.daysOfWeek.includes(weekdayIndex(on));
     case "monthly": {
       // 31일 반복은 30일까지인 달에서 사라지면 안 된다.
       // 그 달의 마지막 날로 당겨서 한 번은 뜨게 한다.
+      const target = Math.min(rule.dayOfMonth, lastDayOfMonth(on));
+      return dayOfMonthOf(on) === target;
+    }
+    case "yearly": {
+      if (Number(on.slice(5, 7)) !== rule.month) return false;
+      // 2월 29일도 같은 이유로 평년엔 28일에 뜬다
       const target = Math.min(rule.dayOfMonth, lastDayOfMonth(on));
       return dayOfMonthOf(on) === target;
     }
@@ -109,13 +125,15 @@ export function recurrenceEndDate(rule: RecurrenceRule): ISODate {
 
 // ── 표시 ──────────────────────────────────────
 
-/** "매일" · "평일" · "매주 월·수·금" · "매월 15일" */
+/** "매일" · "평일" · "주말" · "매주 월·수·금" · "매월 15일" · "매년 3월 5일" */
 export function describeRecurrence(rule: RecurrenceRule): string {
   switch (rule.type) {
     case "daily":
       return "매일";
     case "weekdays":
       return "평일";
+    case "weekend":
+      return "주말";
     case "weekly": {
       if (rule.daysOfWeek.length === 0) return "매주";
       const days = [...rule.daysOfWeek]
@@ -126,6 +144,8 @@ export function describeRecurrence(rule: RecurrenceRule): string {
     }
     case "monthly":
       return `매월 ${rule.dayOfMonth}일`;
+    case "yearly":
+      return `매년 ${rule.month}월 ${rule.dayOfMonth}일`;
   }
 }
 
@@ -140,6 +160,15 @@ function normalizeDays(value: unknown): number[] {
     }
   }
   return [...set].sort((a, b) => a - b);
+}
+
+function isInt(value: unknown, min: number, max: number): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= min &&
+    value <= max
+  );
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -165,6 +194,8 @@ export function normalizeRecurrence(value: unknown): RecurrenceRule | null {
       return endDate ? { type: "daily", endDate } : { type: "daily" };
     case "weekdays":
       return endDate ? { type: "weekdays", endDate } : { type: "weekdays" };
+    case "weekend":
+      return endDate ? { type: "weekend", endDate } : { type: "weekend" };
     case "weekly": {
       const daysOfWeek = normalizeDays(v.daysOfWeek);
       if (daysOfWeek.length === 0) return null;
@@ -174,12 +205,18 @@ export function normalizeRecurrence(value: unknown): RecurrenceRule | null {
     }
     case "monthly": {
       const day = v.dayOfMonth;
-      if (typeof day !== "number" || !Number.isInteger(day) || day < 1 || day > 31) {
-        return null;
-      }
+      if (!isInt(day, 1, 31)) return null;
       return endDate
         ? { type: "monthly", dayOfMonth: day, endDate }
         : { type: "monthly", dayOfMonth: day };
+    }
+    case "yearly": {
+      const month = v.month;
+      const day = v.dayOfMonth;
+      if (!isInt(month, 1, 12) || !isInt(day, 1, 31)) return null;
+      return endDate
+        ? { type: "yearly", month, dayOfMonth: day, endDate }
+        : { type: "yearly", month, dayOfMonth: day };
     }
     default:
       return null;

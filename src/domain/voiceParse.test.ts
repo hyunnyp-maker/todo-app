@@ -146,6 +146,24 @@ describe("반복", () => {
     expect(r.title).toBe("출근 준비");
   });
 
+  it("주말마다", () => {
+    const r = parse("주말마다 등산");
+    expect(r.recurrence).toEqual({ type: "weekend" });
+    expect(r.title).toBe("등산");
+  });
+
+  it("매년 특정 날짜", () => {
+    const r = parse("매년 3월 5일 결혼기념일");
+    expect(r.recurrence).toEqual({ type: "yearly", month: 3, dayOfMonth: 5 });
+    expect(r.title).toBe("결혼기념일");
+  });
+
+  it("매년이 매월보다 먼저 걸린다", () => {
+    // 둘 다 'N월 N일'을 물고 있어 순서가 뒤집히면 매년이 매월로 떨어진다
+    const r = parse("매년 12월 25일 선물 준비");
+    expect(r.recurrence).toEqual({ type: "yearly", month: 12, dayOfMonth: 25 });
+  });
+
   it("매주 특정 요일", () => {
     const r = parse("매주 월요일 회의");
     expect(r.recurrence).toEqual({ type: "weekly", daysOfWeek: [1] });

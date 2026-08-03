@@ -92,7 +92,10 @@ const WEEKLY_RE = new RegExp(
 const WEEKLY_BARE_RE = /매\s*주/;
 const DAILY_RE = /매\s*일(?:마다)?|날마다/;
 const WEEKDAYS_RE = /평일(?:마다|에는|에)?|주중(?:마다|에)?/;
+const WEEKEND_RE = /주말(?:마다|에는|에)?/;
 const MONTHLY_RE = /매\s*(?:월|달)\s*(\d{1,2})\s*일/;
+// "매년"이 "매월"보다 먼저 걸려야 한다 — 둘 다 'N월 N일'을 물고 있다
+const YEARLY_RE = /매\s*(?:년|해)\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일/;
 const WEEKDAY_IN_LIST_RE = new RegExp(`([${WEEKDAY_CHARS}])요일`, "g");
 
 interface RecurrenceHit {
@@ -107,6 +110,23 @@ function matchRecurrence(text: string): RecurrenceHit | null {
     start: m.index,
     end: m.index + m[0].length,
   });
+
+  const yearly = YEARLY_RE.exec(text);
+  if (yearly) {
+    const month = Number(yearly[1]);
+    const day = Number(yearly[2]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return {
+        ...span(yearly),
+        rule: { type: "yearly", month, dayOfMonth: day },
+      };
+    }
+    return {
+      ...span(yearly),
+      rule: null,
+      warning: `"${yearly[0].trim()}"의 날짜를 알아듣지 못했습니다`,
+    };
+  }
 
   const monthly = MONTHLY_RE.exec(text);
   if (monthly) {
@@ -134,6 +154,9 @@ function matchRecurrence(text: string): RecurrenceHit | null {
 
   const weekdays = WEEKDAYS_RE.exec(text);
   if (weekdays) return { ...span(weekdays), rule: { type: "weekdays" } };
+
+  const weekend = WEEKEND_RE.exec(text);
+  if (weekend) return { ...span(weekend), rule: { type: "weekend" } };
 
   const daily = DAILY_RE.exec(text);
   if (daily) return { ...span(daily), rule: { type: "daily" } };

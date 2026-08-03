@@ -48,10 +48,15 @@ export type CheckMode = "once" | "daily";
  */
 export type RecurrenceRule =
   | { type: "daily"; endDate?: ISODate }
+  /** 월~금 */
   | { type: "weekdays"; endDate?: ISODate }
+  /** 토·일 */
+  | { type: "weekend"; endDate?: ISODate }
   /** daysOfWeek: 0=일 … 6=토 */
   | { type: "weekly"; daysOfWeek: number[]; endDate?: ISODate }
-  | { type: "monthly"; dayOfMonth: number; endDate?: ISODate };
+  | { type: "monthly"; dayOfMonth: number; endDate?: ISODate }
+  /** month: 1=1월 … 12=12월 */
+  | { type: "yearly"; month: number; dayOfMonth: number; endDate?: ISODate };
 
 export type RecurrenceType = RecurrenceRule["type"];
 

@@ -78,6 +78,50 @@ describe("평일", () => {
   });
 });
 
+describe("주말", () => {
+  const rule: RecurrenceRule = { type: "weekend" };
+
+  it("토·일만 뜬다", () => {
+    expect(ruleOccursOn(rule, MON, SAT)).toBe(true);
+    expect(ruleOccursOn(rule, MON, SUN)).toBe(true);
+    expect(ruleOccursOn(rule, MON, MON)).toBe(false);
+    expect(ruleOccursOn(rule, MON, "2026-08-07")).toBe(false); // 금
+  });
+
+  it("평일과 겹치지 않는다", () => {
+    const weekdays: RecurrenceRule = { type: "weekdays" };
+    for (let d = 3; d <= 9; d++) {
+      const date = `2026-08-0${d}`;
+      expect(ruleOccursOn(rule, MON, date)).toBe(
+        !ruleOccursOn(weekdays, MON, date),
+      );
+    }
+  });
+});
+
+describe("매년 특정 날짜", () => {
+  const rule: RecurrenceRule = { type: "yearly", month: 3, dayOfMonth: 5 };
+
+  it("그 달 그 날짜에만 뜬다", () => {
+    expect(ruleOccursOn(rule, "2026-01-01", "2026-03-05")).toBe(true);
+    expect(ruleOccursOn(rule, "2026-01-01", "2027-03-05")).toBe(true);
+    expect(ruleOccursOn(rule, "2026-01-01", "2026-03-06")).toBe(false);
+    expect(ruleOccursOn(rule, "2026-01-01", "2026-04-05")).toBe(false);
+  });
+
+  it("시작 전에는 뜨지 않는다", () => {
+    expect(ruleOccursOn(rule, "2026-06-01", "2026-03-05")).toBe(false);
+    expect(ruleOccursOn(rule, "2026-06-01", "2027-03-05")).toBe(true);
+  });
+
+  it("2월 29일은 평년에 28일로 당겨진다", () => {
+    const leap: RecurrenceRule = { type: "yearly", month: 2, dayOfMonth: 29 };
+    expect(ruleOccursOn(leap, "2026-01-01", "2028-02-29")).toBe(true); // 윤년
+    expect(ruleOccursOn(leap, "2026-01-01", "2026-02-28")).toBe(true); // 평년
+    expect(ruleOccursOn(leap, "2026-01-01", "2026-02-27")).toBe(false);
+  });
+});
+
 describe("매주 특정 요일", () => {
   const rule: RecurrenceRule = { type: "weekly", daysOfWeek: [1, 3] }; // 월·수
 
@@ -159,7 +203,30 @@ describe("규칙 검증", () => {
   it("알 수 없는 값은 null (= 반복 없음)", () => {
     expect(normalizeRecurrence(null)).toBeNull();
     expect(normalizeRecurrence("매일")).toBeNull();
+    expect(normalizeRecurrence({ type: "격주" })).toBeNull();
+  });
+
+  it("weekend는 추가 필드 없이 성립한다", () => {
+    expect(normalizeRecurrence({ type: "weekend" })).toEqual({
+      type: "weekend",
+    });
+  });
+
+  it("yearly는 월·일이 둘 다 있어야 규칙이다", () => {
     expect(normalizeRecurrence({ type: "yearly" })).toBeNull();
+    expect(normalizeRecurrence({ type: "yearly", month: 3 })).toBeNull();
+    expect(
+      normalizeRecurrence({ type: "yearly", month: 13, dayOfMonth: 5 }),
+    ).toBeNull();
+    expect(
+      normalizeRecurrence({ type: "yearly", month: 0, dayOfMonth: 5 }),
+    ).toBeNull();
+    expect(
+      normalizeRecurrence({ type: "yearly", month: 3, dayOfMonth: 32 }),
+    ).toBeNull();
+    expect(
+      normalizeRecurrence({ type: "yearly", month: 3, dayOfMonth: 5 }),
+    ).toEqual({ type: "yearly", month: 3, dayOfMonth: 5 });
   });
 
   it("요일이 하나도 없는 weekly는 규칙이 아니다", () => {
@@ -200,6 +267,10 @@ describe("표시 문구", () => {
   it("규칙을 사람 말로 옮긴다", () => {
     expect(describeRecurrence({ type: "daily" })).toBe("매일");
     expect(describeRecurrence({ type: "weekdays" })).toBe("평일");
+    expect(describeRecurrence({ type: "weekend" })).toBe("주말");
+    expect(
+      describeRecurrence({ type: "yearly", month: 3, dayOfMonth: 5 }),
+    ).toBe("매년 3월 5일");
     expect(
       describeRecurrence({ type: "weekly", daysOfWeek: [3, 1, 5] }),
     ).toBe("매주 월·수·금");
