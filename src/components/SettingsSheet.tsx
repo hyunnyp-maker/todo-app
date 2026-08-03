@@ -107,6 +107,15 @@ export function SettingsSheet({
           : "오프라인에서도 쓸 수 있습니다. 연결이 돌아오면 자동으로 맞춰집니다."}
       </p>
 
+      {/* 설치 유도 팝업은 띄우지 않는다 (E2). 원하는 사람만 찾아 쓰게 한 줄로 */}
+      <div className="mt-[14px] border-t border-line pt-[12px]">
+        <p className="text-[13px]">홈 화면에 추가</p>
+        <p className="mt-[2px] text-[11px] leading-[1.6] text-ink-3">
+          브라우저 메뉴에서 &lsquo;홈 화면에 추가&rsquo;를 고르면 주소창 없이 앱처럼
+          열립니다. 오프라인에서도 실행됩니다.
+        </p>
+      </div>
+
       <div className="mt-[16px] border-t border-line pt-[12px] text-center">
         <Brand />
       </div>

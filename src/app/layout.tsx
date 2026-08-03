@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Myquence",
   description: "색으로 구분하는 달력 할일 앱 · by hyunnyp",
+  applicationName: "Myquence",
+  appleWebApp: { capable: true, title: "Myquence", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
@@ -23,7 +27,10 @@ export default function RootLayout({
   // 웹폰트를 로드하지 않는다 (05-design 3.1) — 시스템 폰트는 globals.css에서 지정
   return (
     <html lang="ko" className="h-full">
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <ServiceWorkerRegistrar />
+      </body>
     </html>
   );
 }

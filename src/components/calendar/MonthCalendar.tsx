@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { buildMonthGrid, WEEKDAY_LABELS } from "@/domain/date";
+import { addDays, buildMonthGrid, WEEKDAY_LABELS } from "@/domain/date";
 import { buildDateIndex, sortTasksForDate } from "@/domain/task";
 import type { Category, ISODate, ISOMonth, Task } from "@/domain/types";
 import { CalendarCell } from "./CalendarCell";
@@ -39,10 +39,28 @@ export function MonthCalendar({
 
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
+  /** 키보드로 달력을 오갈 수 있어야 한다 (05-design 8) */
+  function handleKeyDown(e: React.KeyboardEvent) {
+    const delta =
+      e.key === "ArrowLeft"
+        ? -1
+        : e.key === "ArrowRight"
+          ? 1
+          : e.key === "ArrowUp"
+            ? -7
+            : e.key === "ArrowDown"
+              ? 7
+              : 0;
+    if (delta === 0) return;
+    e.preventDefault();
+    onSelect(addDays(selectedDate, delta));
+  }
+
   return (
     <section
       aria-label="월간 달력"
-      className="px-[11px] select-none"
+      onKeyDown={handleKeyDown}
+      className="px-[11px] select-none lg:px-0"
       onTouchStart={(e) => {
         const t = e.touches[0];
         touchStart.current = { x: t.clientX, y: t.clientY };

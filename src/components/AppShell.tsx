@@ -195,8 +195,9 @@ export function AppShell() {
   }
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[520px] flex-col">
-      <header className="flex-none px-[15px] pb-[6px] pt-[8px]">
+    // 1024px 이상: 달력과 리스트를 나란히 (05-design 7)
+    <div className="mx-auto flex h-dvh w-full max-w-[520px] flex-col lg:max-w-[1120px] lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:px-6">
+      <header className="flex-none px-[15px] pb-[6px] pt-[8px] lg:col-span-2 lg:px-0 lg:pt-5">
         <div className="flex items-center justify-between">
           <Brand />
           <button
@@ -246,26 +247,31 @@ export function AppShell() {
         </div>
       </header>
 
-      <CategoryBand
-        categories={categories}
-        hiddenIds={hiddenCategoryIds}
-        showUncategorized={hasUncategorized(tasks)}
-        onToggle={toggleCategory}
-        onEdit={openCategory}
-        onAdd={() => openCategory(null)}
-        onReorder={reorderCategories}
-      />
+      {/* 좁은 화면에서는 display:contents로 아무 층도 만들지 않고,
+          1024px 이상에서만 좌우 두 칸으로 갈라진다 */}
+      <div className="contents lg:flex lg:min-h-0 lg:flex-col">
+        <CategoryBand
+          categories={categories}
+          hiddenIds={hiddenCategoryIds}
+          showUncategorized={hasUncategorized(tasks)}
+          onToggle={toggleCategory}
+          onEdit={openCategory}
+          onAdd={() => openCategory(null)}
+          onReorder={reorderCategories}
+        />
 
-      <MonthCalendar
-        month={visibleMonth}
-        today={today}
-        selectedDate={selectedDate}
-        tasks={calendarTasks}
-        categories={categories}
-        onSelect={selectDate}
-        onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta))}
-      />
+        <MonthCalendar
+          month={visibleMonth}
+          today={today}
+          selectedDate={selectedDate}
+          tasks={calendarTasks}
+          categories={categories}
+          onSelect={selectDate}
+          onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta))}
+        />
+      </div>
 
+      <div className="contents lg:flex lg:min-h-0 lg:flex-col">
       {/* 밀린 할일은 오늘을 보고 있을 때만 (E5). 동기화 표식도 여기 자리한다 */}
       {isToday ? (
         <div className="pt-[8px]">
@@ -334,6 +340,7 @@ export function AppShell() {
         }
         onOpenDetail={openNewTask}
       />
+      </div>
 
       {taskDraft && (
         <TaskEditSheet
