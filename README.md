@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 할일 — 색으로 구분하는 달력 할일 앱
 
-## Getting Started
+> 캘린더의 날짜 감각 + 할일 앱의 체크. 그런데 노션보다 가볍게.
 
-First, run the development server:
+**https://todo-app-two-jet-82.vercel.app** — 가입 없이 바로 써볼 수 있습니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+직장 · 개인 · 가족처럼 하루에 뒤섞이는 영역을 파스텔 색으로 나누고,
+월간 달력 위에서 여러 날에 걸친 할일까지 한 화면에서 관리합니다.
+
+---
+
+## 왜 만들었나
+
+기존 도구에는 각각 빈 구멍이 있었습니다.
+
+| 도구 | 불편함 |
+|---|---|
+| 캘린더 앱 | 일정은 되는데 **완료 개념이 없다**. 지난 주를 봐도 한 일인지 못 한 일인지 모른다 |
+| 노션 · Todoist | 기능은 많은데 **열기가 무겁다**. 30초 안에 적어야 하는데 그 시간을 앱 여는 데 쓴다 |
+
+그래서 **날짜 감각과 완료 체크를 한 화면에** 두고, 입력 마찰을 최대한 깎았습니다.
+
+---
+
+## 설계 원칙
+
+기획 단계에서 실제 사용 시나리오를 먼저 쓰고, 거기서 원칙을 뽑았습니다. ([docs/](./docs))
+
+- **입력은 3탭 · 3초** — 제목 외 모든 필드에 기본값이 채워져 있다
+- **앱을 열면 항상 오늘** — 마지막 본 날짜를 기억하지 않는다
+- **달력과 오늘 리스트가 한 화면에** — 375px 기준, 스크롤 없이
+- **완료 항목은 사라지지 않는다** — "오늘 뭘 했지"에 답할 수 있어야 한다
+- **색만으로 구분하지 않는다** — 카드에 카테고리 이름을 항상 함께 노출
+
+가장 중요한 판단은 **이탈 원인이 성취감 부족이 아니라 입력 마찰**이라고 본 것입니다.
+그래서 보상 장치(스트릭 · 포인트 · 뱃지)를 전부 버리고, 마찰 제거에 예산을 몰았습니다.
+
+---
+
+## 주요 기능
+
+**한 줄 추가 바** — 하단 고정. Enter로 저장하고 커서가 유지돼 연속 입력이 됩니다.
+날짜는 보고 있는 날짜, 카테고리는 마지막에 쓴 것이 기본값입니다.
+
+**두 가지 체크 방식** — 하나의 데이터 모델로 둘을 표현합니다.
+
+```
+마감형(once)   "이사 준비"   3/10 ▓▓▓▓▓▓▓ 3/16   → 체크 한 번
+지속형(daily)  "매일 걷기"   3/1☑ 3/2☑ 3/3☐ …    → 날짜마다 · 12/31일
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**카테고리** — 추가 · 이름 수정 · 색 변경 · 삭제 · 드래그 재정렬.
+색은 엄선한 뮤트 파스텔 12색에서 고르고, 탭하는 즉시 카드와 달력에 반영됩니다.
+소속 할일이 있어도 삭제할 수 있고, 그때 "미분류로 옮기기 / 함께 삭제"를 고릅니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**밀린 할일** — 기본은 접힌 채 개수만. 날짜를 자동으로 바꾸지 않고,
+`[오늘로]`를 눌렀을 때만 기간 길이를 유지한 채 옮깁니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**게스트 모드** — 로그인 없이 전 기능을 씁니다. 로그인하면 기기 간에 이어집니다.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 기술
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| | |
+|---|---|
+| 프레임워크 | Next.js 16 (App Router) · React 19 · TypeScript |
+| 백엔드 | Supabase (Postgres · Auth · RLS) |
+| 서버 상태 | TanStack Query — 낙관적 업데이트 |
+| UI 상태 | Zustand |
+| 스타일 | Tailwind CSS v4 + CSS 변수 |
+| 테스트 | Vitest (61개) |
+| 배포 | Vercel |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 구조
 
-## Deploy on Vercel
+```
+components  →  hooks  →  data  →  (Supabase / localStorage)
+                 ↓
+              domain            ← 순수 함수. 아무것도 import 하지 않는다
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**`TodoRepository` 인터페이스 하나로 게스트와 로그인의 차이를 흡수합니다.**
+컴포넌트는 자기가 어느 모드인지 끝까지 알지 못합니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`domain/`은 React도 Supabase도 모르는 순수 함수라, 테스트가 여기 집중돼 있습니다 —
+월 그리드 · 기간 겹침 · 완료 판정 · 정렬 · 삭제 정책 · 손상 데이터 복구.
+
+### 조회에서 신경 쓴 것
+
+달력은 달이 아니라 **그리드 범위**(7/26 ~ 9/5)로 조회합니다.
+단순히 시작일로 필터하면 3/28~4/3 할일이 4월 달력에서 통째로 사라집니다.
+
+```sql
+where start_date <= :to and end_date >= :from
+```
+
+RLS 정책은 `(select auth.uid())`로 감싸 쿼리당 한 번만 평가되게 했습니다.
+
+---
+
+## 로컬 실행
+
+```bash
+npm install
+cp .env.example .env.local   # Supabase URL · anon key 입력
+npm run dev
+```
+
+환경변수 없이도 **게스트 모드로 전부 동작합니다.** 로그인 기능만 꺼집니다.
+
+```bash
+npm test        # Vitest
+npm run build   # 프로덕션 빌드
+```
+
+DB 스키마는 [`supabase/migrations/`](./supabase/migrations)에 있습니다.
+
+---
+
+## 기획 문서
+
+만들기 전에 쓴 7단계 문서입니다.
+
+| | |
+|---|---|
+| [01 요구사항](./docs/01-requirements.md) | 데이터 모델 · 기능 · 범위 제외 · 완료 기준 |
+| [02 페르소나](./docs/02-personas.md) | 주 사용자 · 대조 · 관문. 설계 긴장점 |
+| [03 시나리오](./docs/03-scenarios.md) | 사용 시나리오 9개 → 설계 원칙 P1~P13 |
+| [04 차별화](./docs/04-engagement.md) | 채택한 장치 5개와 **의도적으로 넣지 않은 것** |
+| [05 디자인](./docs/05-design.md) | 팔레트 · 컴포넌트 · 375px 세로 예산 |
+| [06 아키텍처](./docs/06-architecture.md) | 계층 · 스키마 · 오프라인 큐 설계 |
+| [07 계획](./docs/07-plan.md) | 마일스톤 M1~M8 |
+
+[목업 3안 비교](./docs/mockups/index.html)도 함께 있습니다.
+
+---
+
+## 진행 상황
+
+- [x] M1 디자인 토큰 · 도메인 순수 함수
+- [x] M2 달력 + 오늘 리스트
+- [x] M3 한 줄 추가 바 + 체크 인터랙션
+- [x] M4 카테고리 관리 + 팔레트 + 필터
+- [x] M5 기간형 · 지속형 + 밀린 할일
+- [x] M6 Supabase 인증 + RLS
+- [ ] M7 오프라인 캐시 + 재시도 큐
+- [ ] M8 PWA · 반응형 확장 · QA
+
+**v2 예정** — 카테고리 단위 공유, 읽기/쓰기 권한.
+스키마와 RLS는 지금부터 그 확장을 염두에 두고 설계돼 있습니다.
