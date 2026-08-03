@@ -147,7 +147,7 @@ DB 스키마는 [`supabase/migrations/`](./supabase/migrations)에 있습니다.
 - [x] M5 기간형 · 지속형 + 밀린 할일
 - [x] M6 Supabase 인증 + RLS
 - [x] M7 오프라인 캐시 + 재시도 큐
-- [ ] M8 PWA · 반응형 확장 · QA
+- [x] M8 PWA · 반응형 확장 · QA
 
 **v2 예정** — 카테고리 단위 공유, 읽기/쓰기 권한.
 스키마와 RLS는 지금부터 그 확장을 염두에 두고 설계돼 있습니다.
