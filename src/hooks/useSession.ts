@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { useEffect } from "react";
 import { getSupabaseClient } from "@/data/supabase/client";
+import { clearQueue } from "@/data/sync/queue";
 import { isSupabaseConfigured } from "@/lib/env";
 
 const SESSION_KEY = ["session"] as const;
@@ -36,9 +37,10 @@ export function useSession() {
     const { data } = db.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         qc.setQueryData(SESSION_KEY, session?.user ?? null);
-        // 계정이 바뀌면 남의 데이터가 캐시에 남아 있으면 안 된다
+        // 계정이 바뀌면 남의 데이터가 캐시에 남아 있으면 안 된다 (요구사항 3.4)
         qc.removeQueries({ queryKey: ["tasks"] });
         qc.removeQueries({ queryKey: ["categories"] });
+        if (_event === "SIGNED_OUT") clearQueue();
       },
     );
     return () => data.subscription.unsubscribe();

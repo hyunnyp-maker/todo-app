@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { newId } from "@/data/repository";
+import { enqueue } from "@/data/sync/queue";
 import { nextSortOrder, normalizeCategoryName } from "@/domain/category";
 import { suggestColor } from "@/domain/palette";
 import type { Category, CategoryDeleteMode, PaletteKey } from "@/domain/types";
@@ -18,26 +19,22 @@ export function useCategoryMutations(existing: readonly Category[]) {
   const patch = (fn: (list: Category[]) => Category[]) =>
     qc.setQueryData<Category[]>(key, (old) => (old ? fn(old) : old));
 
-  const snapshot = () => qc.getQueryData<Category[]>(key);
-  const restore = (snap: Category[] | undefined) =>
-    snap !== undefined && qc.setQueryData(key, snap);
-
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: key });
     // 삭제는 할일의 categoryId도 바꾼다
     qc.invalidateQueries({ queryKey: queryKeys.tasksAll(scope) });
   };
 
+  // 전송 실패는 대기 상태로 처리한다 (요구사항 3.5) — 화면을 되돌리지 않는다
   const create = useMutation({
     mutationFn: (category: Category) => repo.createCategory(category),
     onMutate: async (category) => {
       await qc.cancelQueries({ queryKey: key });
-      const snap = snapshot();
       patch((list) => [...list, category]);
-      return { snap };
     },
-    onError: (_e, _v, ctx) => restore(ctx?.snap),
-    onSettled: invalidateAll,
+    onError: (_e, category) =>
+      enqueue({ kind: "category.create", entityId: category.id, payload: category }),
+    onSuccess: invalidateAll,
   });
 
   const update = useMutation({
@@ -45,12 +42,11 @@ export function useCategoryMutations(existing: readonly Category[]) {
       repo.updateCategory(id, p),
     onMutate: async ({ id, patch: p }) => {
       await qc.cancelQueries({ queryKey: key });
-      const snap = snapshot();
       patch((list) => list.map((c) => (c.id === id ? { ...c, ...p } : c)));
-      return { snap };
     },
-    onError: (_e, _v, ctx) => restore(ctx?.snap),
-    onSettled: invalidateAll,
+    onError: (_e, { id, patch: p }) =>
+      enqueue({ kind: "category.update", entityId: id, patch: p }),
+    onSuccess: invalidateAll,
   });
 
   const remove = useMutation({
@@ -58,12 +54,11 @@ export function useCategoryMutations(existing: readonly Category[]) {
       repo.deleteCategory(id, mode),
     onMutate: async ({ id }) => {
       await qc.cancelQueries({ queryKey: key });
-      const snap = snapshot();
       patch((list) => list.filter((c) => c.id !== id));
-      return { snap };
     },
-    onError: (_e, _v, ctx) => restore(ctx?.snap),
-    onSettled: invalidateAll,
+    onError: (_e, { id, mode }) =>
+      enqueue({ kind: "category.delete", entityId: id, mode }),
+    onSuccess: invalidateAll,
   });
 
   const reorder = useMutation({
@@ -79,17 +74,18 @@ export function useCategoryMutations(existing: readonly Category[]) {
     },
     onMutate: async (ids) => {
       await qc.cancelQueries({ queryKey: key });
-      const snap = snapshot();
       const rank = new Map(ids.map((id, i) => [id, i]));
       patch((list) =>
         [...list]
           .map((c) => ({ ...c, sortOrder: rank.get(c.id) ?? c.sortOrder }))
           .sort((a, b) => a.sortOrder - b.sortOrder),
       );
-      return { snap };
     },
-    onError: (_e, _v, ctx) => restore(ctx?.snap),
-    onSettled: invalidateAll,
+    onError: (_e, ids) =>
+      ids.forEach((id, i) =>
+        enqueue({ kind: "category.update", entityId: id, patch: { sortOrder: i } }),
+      ),
+    onSuccess: invalidateAll,
   });
 
   return {

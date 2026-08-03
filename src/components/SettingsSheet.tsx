@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { getSupabaseClient } from "@/data/supabase/client";
 import { useSession } from "@/hooks/useSession";
+import { useSyncQueue } from "@/hooks/useSyncQueue";
 
 interface Props {
   open: boolean;
@@ -19,8 +20,16 @@ export function SettingsSheet({
   onClose,
 }: Props) {
   const { user, isConfigured } = useSession();
+  const { pending } = useSyncQueue();
 
   async function signOut() {
+    // 아직 서버로 못 보낸 변경이 있으면 로그아웃과 함께 사라진다 (요구사항 3.4)
+    if (pending > 0) {
+      const ok = window.confirm(
+        `아직 서버에 보내지 못한 변경 ${pending}건이 있습니다.\n지금 로그아웃하면 그 변경은 사라집니다. 계속할까요?`,
+      );
+      if (!ok) return;
+    }
     await getSupabaseClient()?.auth.signOut();
     onClose();
   }
@@ -92,7 +101,9 @@ export function SettingsSheet({
       </div>
 
       <p className="mt-[14px] text-[11px] leading-[1.6] text-ink-3">
-        오프라인 동기화는 M7, 홈 화면 설치 안내는 M8에서 추가됩니다.
+        {pending > 0
+          ? `서버에 보내지 못한 변경 ${pending}건이 대기 중입니다. 온라인이 되면 자동으로 전송됩니다.`
+          : "오프라인에서도 쓸 수 있습니다. 연결이 돌아오면 자동으로 맞춰집니다."}
       </p>
     </Sheet>
   );

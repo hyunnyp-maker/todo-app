@@ -2,6 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { newId } from "@/data/repository";
+import { enqueue } from "@/data/sync/queue";
+import type { NewQueueOp } from "@/data/sync/types";
 import { addDays, dayCount } from "@/domain/date";
 import { isDoneOn, toggleCompletedDate } from "@/domain/task";
 import type { ISODate, Task } from "@/domain/types";
@@ -62,26 +64,26 @@ export function useTaskMutations() {
     );
   };
 
-  const snapshot = () =>
-    qc.getQueriesData<Task[]>({ queryKey: queryKeys.tasksAll(scope) });
-
-  const restore = (snap: ReturnType<typeof snapshot>) => {
-    for (const [key, data] of snap) qc.setQueryData(key, data);
-  };
-
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: queryKeys.tasksAll(scope) });
+
+  /**
+   * 전송이 실패해도 화면을 되돌리지 않는다.
+   * 큐에 담아두고 온라인이 되면 다시 보낸다 — 실패는 에러가 아니라 대기 상태다
+   * (요구사항 3.5 규칙 3). 3회까지 실패하면 그때 최종 실패로 승격되고,
+   * flush가 캐시를 무효화해 화면이 서버 상태로 돌아온다.
+   */
+  const queueOnError = (op: NewQueueOp) => () => enqueue(op);
 
   const create = useMutation({
     mutationFn: (task: Task) => repo.createTask(task),
     onMutate: async (task) => {
       await qc.cancelQueries({ queryKey: queryKeys.tasksAll(scope) });
-      const snap = snapshot();
       patchCaches((tasks) => [...tasks, task], { includeOverdue: false });
-      return { snap };
     },
-    onError: (_e, _task, ctx) => ctx && restore(ctx.snap),
-    onSettled: invalidate,
+    onError: (_e, task) =>
+      queueOnError({ kind: "task.create", entityId: task.id, payload: task })(),
+    onSuccess: invalidate,
   });
 
   const update = useMutation({
@@ -89,26 +91,23 @@ export function useTaskMutations() {
       repo.updateTask(id, patch),
     onMutate: async ({ id, patch }) => {
       await qc.cancelQueries({ queryKey: queryKeys.tasksAll(scope) });
-      const snap = snapshot();
       patchCaches((tasks) =>
         tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)),
       );
-      return { snap };
     },
-    onError: (_e, _vars, ctx) => ctx && restore(ctx.snap),
-    onSettled: invalidate,
+    onError: (_e, { id, patch }) =>
+      queueOnError({ kind: "task.update", entityId: id, patch })(),
+    onSuccess: invalidate,
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => repo.deleteTask(id),
     onMutate: async (id) => {
       await qc.cancelQueries({ queryKey: queryKeys.tasksAll(scope) });
-      const snap = snapshot();
       patchCaches((tasks) => tasks.filter((t) => t.id !== id));
-      return { snap };
     },
-    onError: (_e, _id, ctx) => ctx && restore(ctx.snap),
-    onSettled: invalidate,
+    onError: (_e, id) => queueOnError({ kind: "task.delete", entityId: id })(),
+    onSuccess: invalidate,
   });
 
   /**

@@ -6,6 +6,8 @@ import { CategoryBand } from "@/components/category/CategoryBand";
 import { CategoryEditSheet } from "@/components/category/CategoryEditSheet";
 import { QuickAddBar } from "@/components/input/QuickAddBar";
 import { SettingsSheet } from "@/components/SettingsSheet";
+import { MigrationPrompt } from "@/components/MigrationPrompt";
+import { SyncBadge } from "@/components/sync/SyncBadge";
 import { OverdueFold } from "@/components/task/OverdueFold";
 import { TaskEditSheet, type TaskDraft } from "@/components/task/TaskEditSheet";
 import { TaskList } from "@/components/task/TaskList";
@@ -27,6 +29,7 @@ import type { Category, CategoryDeleteMode, PaletteKey, Task } from "@/domain/ty
 import { useCategories } from "@/hooks/useCategories";
 import { useCategoryMutations } from "@/hooks/useCategoryMutations";
 import { useOverdueTasks } from "@/hooks/useOverdueTasks";
+import { useSyncQueue } from "@/hooks/useSyncQueue";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { useTasks } from "@/hooks/useTasks";
 import { useToday } from "@/hooks/useToday";
@@ -57,6 +60,7 @@ export function AppShell() {
   const { overdue } = useOverdueTasks(today);
   const { createTask, updateTask, deleteTask, toggle, moveToToday } =
     useTaskMutations();
+  const { pending, lastError, dismissError } = useSyncQueue();
   const {
     createCategory,
     renameCategory,
@@ -254,8 +258,8 @@ export function AppShell() {
         onShiftMonth={(delta) => goToMonth(addMonths(visibleMonth, delta))}
       />
 
-      {/* 밀린 할일은 오늘을 보고 있을 때만 (E5) */}
-      {isToday && (
+      {/* 밀린 할일은 오늘을 보고 있을 때만 (E5). 동기화 표식도 여기 자리한다 */}
+      {isToday ? (
         <div className="pt-[8px]">
           <OverdueFold
             tasks={overdueVisible}
@@ -265,8 +269,15 @@ export function AppShell() {
             onToggleOpen={toggleOverdue}
             onMoveToToday={(task) => moveToToday(task, today)}
             onOpen={openEditTask}
+            rightSlot={<SyncBadge pending={pending} />}
           />
         </div>
+      ) : (
+        pending > 0 && (
+          <div className="flex flex-none justify-end px-[15px] pt-[6px]">
+            <SyncBadge pending={pending} />
+          </div>
+        )
       )}
 
       <div className="flex flex-none items-center justify-between px-[15px] pb-[5px] pt-[11px] text-[11px] text-ink-3">
@@ -349,6 +360,24 @@ export function AppShell() {
         onHideCompletedChange={setHideCompleted}
         onClose={() => setSettingsOpen(false)}
       />
+
+      <MigrationPrompt />
+
+      {/* 최종 실패는 숨기지 않는다 (요구사항 F6-9). 화면은 이미 서버 상태로 되돌아간 뒤다 */}
+      {lastError && (
+        <div className="fixed inset-x-0 bottom-0 z-[65] mx-auto max-w-[520px] px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          <div
+            role="alert"
+            className="flex items-center gap-3 rounded-[12px] px-[14px] py-[11px] text-[12.5px]"
+            style={{ background: "var(--danger)", color: "#fff" }}
+          >
+            <span className="flex-1">동기화에 실패했습니다 — {lastError}</span>
+            <button type="button" onClick={dismissError} className="shrink-0 underline">
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog
         open={pendingDelete !== null}
