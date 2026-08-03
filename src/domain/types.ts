@@ -15,7 +15,17 @@ export type PaletteKey =
   | "pink"
   | "purple"
   | "brown"
-  | "ink";
+  | "ink"
+  // 카테고리가 9개를 넘으면 색이 겹친다. 색상환의 빈 구간을 채워 18색으로 늘렸다
+  | "lime"
+  | "mint"
+  | "sky"
+  | "navy"
+  | "indigo"
+  | "wine"
+  | "peach"
+  | "khaki"
+  | "gray";
 
 /** 화면 테마. system은 기기 설정을 따라간다 */
 export type ThemeMode = "light" | "dark" | "system";

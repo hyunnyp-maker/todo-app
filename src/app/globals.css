@@ -48,6 +48,19 @@
   --brown-bg: #f2eae4;  --brown-tx: #6a3410;  --brown-dt: #8a4a1c;  --brown-cp: #6a3410;
   --ink-bg: #eeeff1;    --ink-tx: #141414;    --ink-dt: #141414;    --ink-cp: #2b2e33;
 
+  /* ── 확장 9색 ──
+     카테고리가 10개를 넘으면 색이 겹치므로 색상환의 빈 구간을 채웠다.
+     규칙은 위와 같다 — tx/cp는 4.5:1을 넘도록 명도를 낮춘 값이다 */
+  --sky-bg: #e2f2f7;    --sky-tx: #00728c;    --sky-dt: #00b0d8;    --sky-cp: #00728c;
+  --mint-bg: #e0f4f0;   --mint-tx: #00796b;   --mint-dt: #12bfa2;   --mint-cp: #00796b;
+  --lime-bg: #eef5e4;   --lime-tx: #4d7c1f;   --lime-dt: #7cb342;   --lime-cp: #4d7c1f;
+  --peach-bg: #fdece7;  --peach-tx: #b34a2e;  --peach-dt: #f4785c;  --peach-cp: #b34a2e;
+  --wine-bg: #f9e6ec;   --wine-tx: #9b1b45;   --wine-dt: #a52050;   --wine-cp: #9b1b45;
+  --indigo-bg: #eceafa; --indigo-tx: #4338ca; --indigo-dt: #5b4bd6; --indigo-cp: #4338ca;
+  --navy-bg: #e8ecf7;   --navy-tx: #2b4a9e;   --navy-dt: #2b4a9e;   --navy-cp: #2b4a9e;
+  --khaki-bg: #f1f1e2;  --khaki-tx: #6b6b28;  --khaki-dt: #8a8a3c;  --khaki-cp: #6b6b28;
+  --gray-bg: #eef0f2;   --gray-tx: #545c66;   --gray-dt: #7b8794;   --gray-cp: #545c66;
+
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-check: 250ms;
 
@@ -85,6 +98,16 @@
   --purple-bg: #1f1429; --purple-tx: #a97fd0; --purple-dt: #9260be; --purple-cp: #7a3f9f;
   --brown-bg: #241a12;  --brown-tx: #c08b5e;  --brown-dt: #b0724a;  --brown-cp: #7d4319;
   --ink-bg: #1f2126;    --ink-tx: #d2d6dc;    --ink-dt: #c3c8cf;    --ink-cp: #3a3d44;
+
+  --sky-bg: #0e2530;    --sky-tx: #57c9e8;    --sky-dt: #22bfe0;    --sky-cp: #00728c;
+  --mint-bg: #0f2622;   --mint-tx: #4dd6bb;   --mint-dt: #23cfae;   --mint-cp: #00796b;
+  --lime-bg: #1b2410;   --lime-tx: #a3d16b;   --lime-dt: #8fc44f;   --lime-cp: #4f7d20;
+  --peach-bg: #2c1710;  --peach-tx: #f79b80;  --peach-dt: #f4785c;  --peach-cp: #b34a2e;
+  --wine-bg: #2a121b;   --wine-tx: #ef7396;   --wine-dt: #e04a76;   --wine-cp: #9b1b45;
+  --indigo-bg: #191635; --indigo-tx: #a29bf0; --indigo-dt: #8a7fe8; --indigo-cp: #4b40c4;
+  --navy-bg: #131c33;   --navy-tx: #8aa5e8;   --navy-dt: #6f8ee0;   --navy-cp: #2f5099;
+  --khaki-bg: #23230f;  --khaki-tx: #c5c56a;  --khaki-dt: #b0b04a;  --khaki-cp: #6b6b28;
+  --gray-bg: #1c1f23;   --gray-tx: #a4aeb9;   --gray-dt: #8d99a6;   --gray-cp: #545c66;
 
   color-scheme: dark;
 }

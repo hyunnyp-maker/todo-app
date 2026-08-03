@@ -29,6 +29,13 @@ export interface ToneSet {
   cp: string;
 }
 
+/**
+ * 고를 수 있는 색의 순서. 앞의 9색이 1차 팔레트다.
+ *
+ * 뒤의 9색은 카테고리가 10개를 넘을 때를 위해 색상환의 빈 구간을 채운 것이다.
+ * 팔레트가 9색뿐이면 열 번째 카테고리부터 반드시 색이 겹쳐,
+ * 카드 좌측 띠와 달력 점만으로는 어느 카테고리인지 구분할 수 없게 된다.
+ */
 export const PALETTE_KEYS: readonly PaletteKey[] = [
   "blue",
   "green",
@@ -39,6 +46,15 @@ export const PALETTE_KEYS: readonly PaletteKey[] = [
   "yellow",
   "brown",
   "ink",
+  "sky",
+  "mint",
+  "lime",
+  "peach",
+  "wine",
+  "indigo",
+  "navy",
+  "khaki",
+  "gray",
 ] as const;
 
 export const PALETTE_LABELS: Record<PaletteKey, string> = {
@@ -51,6 +67,15 @@ export const PALETTE_LABELS: Record<PaletteKey, string> = {
   purple: "퍼플",
   brown: "브라운",
   ink: "블랙",
+  sky: "스카이",
+  mint: "민트",
+  lime: "라임",
+  peach: "피치",
+  wine: "와인",
+  indigo: "인디고",
+  navy: "네이비",
+  khaki: "카키",
+  gray: "그레이",
 };
 
 /** 참고 컬러 차트의 키워드. 색을 고를 때 성격을 함께 보여준다 */
@@ -64,6 +89,15 @@ export const PALETTE_MEANINGS: Record<PaletteKey, string> = {
   purple: "품격 · 몰입",
   brown: "듬직 · 실용",
   ink: "격식 · 집중",
+  sky: "개방 · 청량",
+  mint: "산뜻 · 여유",
+  lime: "활력 · 신선",
+  peach: "다정 · 환대",
+  wine: "깊이 · 격조",
+  indigo: "몰입 · 사색",
+  navy: "안정 · 신중",
+  khaki: "담백 · 실용",
+  gray: "중립 · 보조",
 };
 
 /**
