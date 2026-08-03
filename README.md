@@ -151,3 +151,11 @@ DB 스키마는 [`supabase/migrations/`](./supabase/migrations)에 있습니다.
 
 **v2 예정** — 카테고리 단위 공유, 읽기/쓰기 권한.
 스키마와 RLS는 지금부터 그 확장을 염두에 두고 설계돼 있습니다.
+
+---
+
+## Let's connect
+
+[github.com/hyunnyp-maker](https://github.com/hyunnyp-maker)
+
+_by hyunnyp_
