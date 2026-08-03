@@ -43,14 +43,18 @@ export function TaskCard({
 
   return (
     <div className="relative overflow-hidden rounded-card">
-      {/* 스와이프로 드러나는 삭제 영역 */}
-      <div
-        aria-hidden
-        className="absolute inset-y-0 right-0 flex w-[76px] items-center justify-center text-[12px] font-medium"
-        style={{ color: "var(--danger)", background: "var(--line-2)" }}
-      >
-        삭제
-      </div>
+      {/* 스와이프로 드러나는 삭제 영역.
+          끌고 있을 때만 그린다 — 완료된 카드는 opacity가 낮아
+          항상 깔려 있으면 아래의 '삭제'가 비쳐 보인다 */}
+      {offset < 0 && (
+        <div
+          aria-hidden
+          className="absolute inset-y-0 right-0 flex w-[76px] items-center justify-center text-[12px] font-medium"
+          style={{ color: "var(--danger)", background: "var(--line-2)" }}
+        >
+          삭제
+        </div>
+      )}
 
       <div
         role="button"

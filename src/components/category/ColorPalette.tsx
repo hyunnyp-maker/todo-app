@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { PALETTE_KEYS, PALETTE_LABELS, toneOf } from "@/domain/palette";
 import type { PaletteKey } from "@/domain/types";
 
@@ -17,11 +18,23 @@ interface Props {
  * 아직 안 쓴 색을 앞에 놓아, 위에서부터 고르면 자연히 겹치지 않는다.
  */
 export function ColorPalette({ value, used, onChange }: Props) {
-  const taken = new Set(used);
-  const ordered = [
-    ...PALETTE_KEYS.filter((k) => !taken.has(k)),
-    ...PALETTE_KEYS.filter((k) => taken.has(k)),
-  ];
+  // 정렬 순서와 '사용 중' 표시를 열린 시점에 고정한다.
+  //
+  // 색을 고르면 즉시 미리보기가 실제 카테고리 색을 바꾸고, 그러면 '사용 중인 색' 목록이
+  // 달라져 격자가 통째로 재배치된다. 방금 누른 색이 다른 자리로 튀어
+  // 색을 비교하며 고르는 일이 불가능해진다 (03-scenarios S5).
+  // 시트는 열 때마다 리마운트되므로 이 고정은 다음에 열 때 갱신된다.
+  const [frozen] = useState(() => {
+    const taken = new Set(used);
+    return {
+      taken,
+      ordered: [
+        ...PALETTE_KEYS.filter((k) => !taken.has(k)),
+        ...PALETTE_KEYS.filter((k) => taken.has(k)),
+      ],
+    };
+  });
+  const { taken, ordered } = frozen;
 
   return (
     <div className="grid grid-cols-6 gap-[8px]">

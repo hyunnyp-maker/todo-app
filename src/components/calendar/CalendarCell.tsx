@@ -31,6 +31,11 @@ export function CalendarCell({
   const overflow = tasks.length - marks.length;
   const day = Number(date.slice(8));
 
+  // 넓은 화면(md+)에서는 하루짜리만 제목으로 읽고, 기간형은 좁은 화면과 똑같이 막대로 잇는다.
+  // 기간형까지 제목으로 쓰면 29일짜리 할일 하나가 달력 전체를 같은 문구로 덮는다.
+  const spans = marks.filter(isMultiDay);
+  const singles = marks.filter((task) => !isMultiDay(task));
+
   return (
     <button
       type="button"
@@ -49,8 +54,12 @@ export function CalendarCell({
         "relative flex h-[34px] flex-col items-center justify-start rounded-cell pt-[4px]",
         "text-[11px] leading-none transition-colors",
         "after:absolute after:inset-x-0 after:top-1/2 after:h-[44px] after:-translate-y-1/2 after:content-['']",
-        // 넓은 화면에서는 셀을 키우고 제목까지 보여준다 (05-design 7)
-        "md:h-[64px] md:items-stretch md:px-[4px] md:after:hidden",
+        // 넓은 화면에서는 셀을 키우고 제목까지 보여준다 (05-design 7).
+        //
+        // min-h-0이 핵심이다. 그리드 아이템의 기본값 min-height:auto는
+        // 내용보다 작아지는 것을 막아 h-[76px]를 무시한다.
+        // 그러면 할일이 많은 칸만 세로로 늘어나 격자가 들쭉날쭉해진다.
+        "md:h-[76px] md:min-h-0 md:items-stretch md:justify-start md:overflow-hidden md:px-[4px] md:pb-[3px] md:after:hidden",
         isToday ? "bg-ink font-bold text-white" : "",
         !isToday && isSelected ? "ring-[1.5px] ring-ink ring-inset" : "",
       ].join(" ")}
@@ -60,7 +69,7 @@ export function CalendarCell({
     >
       <span className="md:self-center">{day}</span>
 
-      {/* 좁은 화면에서는 점으로, 넓은 화면에서는 아래 제목으로 대신한다 */}
+      {/* 좁은 화면: 하루짜리는 점, 기간형은 막대 — 전부 한 줄에 */}
       <span className="mt-[3px] flex h-[5px] items-center gap-[2px] md:hidden">
         {marks.map((task) => {
           const tone = toneOf(
@@ -97,9 +106,31 @@ export function CalendarCell({
         )}
       </span>
 
-      {/* 768px 이상에서만: 점 대신 제목을 직접 읽는다 */}
-      <span className="mt-[2px] hidden w-full flex-col gap-[1px] overflow-hidden md:flex">
-        {marks.slice(0, 2).map((task) => {
+      {/* 768px 이상 ─────────────────────────────────
+          기간형은 막대를 그대로 유지한다. 며칠에 걸쳐 이어지는 형태 자체가 정보라서,
+          날짜마다 같은 제목을 반복하면 정보가 늘지 않고 화면만 시끄러워진다. */}
+      <span className="mt-[3px] hidden w-full flex-col gap-[2px] md:flex">
+        {spans.map((task) => {
+          const tone = toneOf(
+            task.categoryId ? categoryById.get(task.categoryId)?.color : null,
+          );
+          return (
+            <span
+              key={task.id}
+              aria-hidden
+              className="h-[4px] w-full rounded-[2px]"
+              style={{
+                background: isToday ? "#ffffff" : tone.dt,
+                opacity: isDoneOn(task, date) ? 0.35 : 1,
+              }}
+            />
+          );
+        })}
+      </span>
+
+      {/* 하루짜리만 제목으로 읽는다 */}
+      <span className="mt-[2px] hidden w-full flex-col gap-[1px] md:flex">
+        {singles.slice(0, 2).map((task) => {
           const tone = toneOf(
             task.categoryId ? categoryById.get(task.categoryId)?.color : null,
           );
@@ -109,7 +140,7 @@ export function CalendarCell({
               aria-hidden
               className="truncate rounded-[3px] px-[3px] py-[1px] text-left text-[9.5px] leading-[1.3]"
               style={{
-                background: isToday ? "rgba(255,255,255,0.14)" : tone.bg,
+                background: isToday ? "rgba(255,255,255,0.16)" : tone.bg,
                 color: isToday ? "#fff" : tone.tx,
                 opacity: isDoneOn(task, date) ? 0.45 : 1,
               }}
@@ -118,6 +149,15 @@ export function CalendarCell({
             </span>
           );
         })}
+        {overflow > 0 && (
+          <span
+            aria-hidden
+            className="px-[3px] text-left text-[8.5px] leading-[1.3]"
+            style={{ color: isToday ? "rgba(255,255,255,0.7)" : "var(--ink-3)" }}
+          >
+            +{overflow}
+          </span>
+        )}
       </span>
     </button>
   );
