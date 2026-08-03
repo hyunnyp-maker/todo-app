@@ -1,0 +1,73 @@
+/**
+ * UI 상태 — 서버와 무관한 것만 (06-architecture 2장).
+ * 서버에서 온 데이터는 여기 넣지 않는다. 그건 TanStack Query가 유일한 소유자다.
+ *
+ * selectedDate / visibleMonth는 "사용자가 명시적으로 고른 값"만 담고 저장하지 않는다.
+ * 그래야 앱을 열면 항상 오늘이 된다 (03-scenarios P2).
+ * 반대로 필터 설정은 새로고침해도 남아야 한다 (요구사항 F5-3).
+ */
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { monthOf } from "@/domain/date";
+import type { ISODate, ISOMonth } from "@/domain/types";
+
+interface UiState {
+  selectedDate: ISODate | null;
+  visibleMonth: ISOMonth | null;
+  calendarCollapsed: boolean;
+  hiddenCategoryIds: string[];
+  hideCompleted: boolean;
+  overdueOpen: boolean;
+
+  selectDate: (date: ISODate) => void;
+  goToMonth: (month: ISOMonth) => void;
+  goToToday: (today: ISODate) => void;
+  setCalendarCollapsed: (v: boolean) => void;
+  toggleCategory: (id: string) => void;
+  setHideCompleted: (v: boolean) => void;
+  toggleOverdue: () => void;
+}
+
+export const useUiStore = create<UiState>()(
+  persist(
+    (set) => ({
+      selectedDate: null,
+      visibleMonth: null,
+      calendarCollapsed: false,
+      hiddenCategoryIds: [],
+      // 완료 항목이 사라지면 "오늘 뭐 했지"에 답할 게 없어진다 (P7)
+      hideCompleted: false,
+      overdueOpen: false,
+
+      // 날짜를 고르면 보이는 달도 따라간다 (다른 달 칸을 탭한 경우)
+      selectDate: (date) =>
+        set({ selectedDate: date, visibleMonth: monthOf(date) }),
+
+      goToMonth: (month) => set({ visibleMonth: month }),
+
+      goToToday: (today) =>
+        set({ selectedDate: today, visibleMonth: monthOf(today) }),
+
+      setCalendarCollapsed: (v) => set({ calendarCollapsed: v }),
+
+      toggleCategory: (id) =>
+        set((s) => ({
+          hiddenCategoryIds: s.hiddenCategoryIds.includes(id)
+            ? s.hiddenCategoryIds.filter((x) => x !== id)
+            : [...s.hiddenCategoryIds, id],
+        })),
+
+      setHideCompleted: (v) => set({ hideCompleted: v }),
+      toggleOverdue: () => set((s) => ({ overdueOpen: !s.overdueOpen })),
+    }),
+    {
+      name: "todo-app:ui:v1",
+      // 날짜는 저장하지 않는다 — 저장하면 P2가 깨진다
+      partialize: (s) => ({
+        hiddenCategoryIds: s.hiddenCategoryIds,
+        hideCompleted: s.hideCompleted,
+      }),
+    },
+  ),
+);

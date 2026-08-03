@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────
+   디자인 토큰 · 05-design.md 2장
+   원칙: 색은 카테고리에만 쓴다. UI 크롬은 무채색.
+   ────────────────────────────────────────────── */
+
+:root {
+  /* ── 중립 (UI 크롬) ── */
+  --ink: #1c1f23;
+  --ink-2: #5b6169;
+  --ink-3: #8f959d;
+  --line: #e6e8eb;
+  --line-2: #f0f1f3;
+  --surface: #ffffff;
+  --danger: #a8564f;
+
+  /* ── 미분류 (팔레트 아님) ── */
+  --none-bg: #f2f3f4;
+  --none-tx: #5b6169;
+  --none-dt: #9aa0a6;
+
+  /* ── 카테고리 팔레트 12색 × 3톤 ──
+     -bg 카드 배경 / -tx 텍스트 / -dt 점·막대 */
+  --sage-bg: #edf2e9;     --sage-tx: #3f5334;     --sage-dt: #6e8f57;
+  --rose-bg: #f7eaec;     --rose-tx: #6b3a42;     --rose-dt: #a96f7b;
+  --mist-bg: #e8f0f5;     --mist-tx: #2f4a5c;     --mist-dt: #5e88a2;
+  --lavender-bg: #efebf5; --lavender-tx: #473f5c; --lavender-dt: #7c6fa2;
+  --clay-bg: #f7ebe4;     --clay-tx: #6b4632;     --clay-dt: #a87356;
+  --mustard-bg: #f5efdf;  --mustard-tx: #5e4c22;  --mustard-dt: #997e38;
+  --olive-bg: #f0f1e3;    --olive-tx: #4c5230;    --olive-dt: #7b8349;
+  --teal-bg: #e4f0ef;     --teal-tx: #2c4e4c;     --teal-dt: #558c88;
+  --plum-bg: #f3eaf1;     --plum-tx: #573c52;     --plum-dt: #8e6885;
+  --sand-bg: #f4efe7;     --sand-tx: #5c4e3a;     --sand-dt: #93805f;
+  --slate-bg: #eaedf3;    --slate-tx: #3a4459;    --slate-dt: #67738f;
+  --coral-bg: #f9eae7;    --coral-tx: #6e3f36;    --coral-dt: #af6e5e;
+
+  /* ── 모션 (05-design 6.1) ── */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-check: 250ms;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-surface: var(--surface);
+  --color-danger: var(--danger);
+
+  --radius-card: 12px;
+  --radius-cell: 8px;
+  --radius-check: 5px;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Malgun Gothic",
+    "Apple SD Gothic Neo", sans-serif;
+}
+
+/* 웹폰트를 로드하지 않는다 — 첫 렌더 지연을 만들지 않기 위해 (05-design 3.1) */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* 어떤 폭에서도 가로 스크롤이 발생하지 않는다 (요구사항 6.3) */
+  overflow-x: hidden;
+}
+
+/* 포커스는 :focus-visible 만 (05-design 8) */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* 체크 마이크로 인터랙션 (E3) — 카테고리 색이 카드에 번지는 0.25초.
+   같은 순간 달력의 점도 옅어진다. 둘의 연결을 눈으로 알려주는 게 목적이다. */
+@keyframes check-spread {
+  from {
+    opacity: 0.45;
+    transform: scale(0.15);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+.check-spread {
+  animation: check-spread var(--dur-check) var(--ease) forwards;
+}
+
+/* 모션 축소 존중 (E3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

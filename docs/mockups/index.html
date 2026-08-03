@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>할일 앱 — 디자인 시안 비교</title>
+<style>
+:root{
+  --ink:#1c1f23; --ink-2:#5b6169; --ink-3:#8f959d;
+  --line:#e6e8eb; --line-2:#f0f1f3; --bg:#f7f8f9; --card:#ffffff;
+  --radius:14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
+          "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+
+  /* ── 뮤트 파스텔 12색 · 3단계 톤 ─────────────── */
+  --c1-bg:#EDF2E9; --c1-tx:#3F5334; --c1-dt:#6E8F57;  /* 세이지 */
+  --c2-bg:#F7EAEC; --c2-tx:#6B3A42; --c2-dt:#A96F7B;  /* 더스티 로즈 */
+  --c3-bg:#E8F0F5; --c3-tx:#2F4A5C; --c3-dt:#5E88A2;  /* 미스트 블루 */
+  --c4-bg:#EFEBF5; --c4-tx:#473F5C; --c4-dt:#7C6FA2;  /* 라벤더 */
+  --c5-bg:#F7EBE4; --c5-tx:#6B4632; --c5-dt:#A87356;  /* 클레이 */
+  --c6-bg:#F5EFDF; --c6-tx:#5E4C22; --c6-dt:#997E38;  /* 머스터드 */
+  --c7-bg:#F0F1E3; --c7-tx:#4C5230; --c7-dt:#7B8349;  /* 올리브 */
+  --c8-bg:#E4F0EF; --c8-tx:#2C4E4C; --c8-dt:#558C88;  /* 티일 */
+  --c9-bg:#F3EAF1; --c9-tx:#573C52; --c9-dt:#8E6885;  /* 플럼 */
+  --c10-bg:#F4EFE7;--c10-tx:#5C4E3A;--c10-dt:#93805F; /* 샌드 */
+  --c11-bg:#EAEDF3;--c11-tx:#3A4459;--c11-dt:#67738F; /* 슬레이트 */
+  --c12-bg:#F9EAE7;--c12-tx:#6E3F36;--c12-dt:#AF6E5E; /* 코랄 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);
+     line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:40px 20px 80px}
+
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--ink-2);font-size:14px;margin-top:6px}
+h2{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+.hr{height:1px;background:var(--line);margin:44px 0 28px}
+
+/* ── 팔레트 ───────────────────────────── */
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:16px}
+.sw{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.sw-top{padding:11px 13px;font-size:13px;font-weight:600;display:flex;
+        justify-content:space-between;align-items:center}
+.sw-bot{display:flex;font-size:10px;color:var(--ink-3);
+        border-top:1px solid var(--line-2);font-family:ui-monospace,monospace}
+.sw-bot div{flex:1;padding:5px 8px;text-align:center}
+.sw-bot div+div{border-left:1px solid var(--line-2)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* ── 시안 그리드 ───────────────────────── */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:26px;margin-top:22px}
+.opt{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;
+     display:flex;flex-direction:column}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+     color:var(--ink-3);margin-bottom:7px}
+.philo{font-size:13px;color:var(--ink-2);margin:7px 0 16px;min-height:40px}
+
+/* ── 폰 프레임 ─────────────────────────── */
+.phone{width:100%;max-width:330px;margin:0 auto;height:600px;background:#fff;
+       border:8px solid #21252b;border-radius:34px;overflow:hidden;
+       display:flex;flex-direction:column;position:relative;font-size:13px}
+.st{height:22px;background:#fff;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;font-size:10px;color:var(--ink-3);flex:0 0 auto}
+.hd{padding:9px 15px 7px;display:flex;align-items:center;justify-content:space-between;flex:0 0 auto}
+.hd b{font-size:17px;letter-spacing:-.01em}
+.hd .ic{color:var(--ink-3);font-size:15px}
+
+/* 달력 */
+.cal{padding:0 11px;flex:0 0 auto}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);font-size:10px;color:var(--ink-3);
+     text-align:center;padding-bottom:3px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cell{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;
+      justify-content:flex-start;padding-top:4px;border-radius:8px;font-size:11px;color:var(--ink-2)}
+.cell.dim{color:#c8ccd1}
+.cell.today{background:#21252b;color:#fff;font-weight:700}
+.dots{display:flex;gap:2px;margin-top:3px;height:5px}
+.dots i{width:4.5px;height:4.5px;border-radius:50%}
+.bar{height:4px;border-radius:2px;margin-top:3px;width:86%}
+/* 압축 달력 */
+.cal.tight .cell{aspect-ratio:auto;height:34px}
+/* 주간 스트립 */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:4px 12px 10px;flex:0 0 auto}
+.wd{text-align:center;padding:7px 0 6px;border-radius:11px;font-size:11px;color:var(--ink-2);
+    background:var(--line-2)}
+.wd b{display:block;font-size:15px;margin-top:2px;font-weight:600}
+.wd.on{background:#21252b;color:#fff}
+.wd .dots{justify-content:center;margin-top:4px}
+
+/* 리스트 */
+.sect{padding:11px 15px 5px;font-size:11px;color:var(--ink-3);display:flex;
+      justify-content:space-between;flex:0 0 auto}
+.list{flex:1 1 auto;overflow:hidden;padding:0 12px}
+.item{border-radius:12px;padding:10px 12px;margin-bottom:7px;display:flex;
+      align-items:flex-start;gap:9px}
+.cb{width:16px;height:16px;border-radius:5px;border:1.6px solid currentColor;
+    opacity:.5;flex:0 0 auto;margin-top:1px}
+.cb.on{background:currentColor;opacity:.85}
+.it-b{flex:1;min-width:0}
+.it-t{font-size:13.5px;font-weight:500;line-height:1.35}
+.it-m{font-size:10.5px;opacity:.72;margin-top:3px;display:flex;gap:7px;flex-wrap:wrap}
+.done .it-t{text-decoration:line-through;opacity:.5}
+.done{opacity:.62}
+
+/* 밀림 */
+.fold{margin:0 12px 8px;border:1px dashed #d8dbdf;border-radius:11px;padding:9px 12px;
+      font-size:11.5px;color:var(--ink-2);display:flex;justify-content:space-between;flex:0 0 auto}
+
+/* 카테고리 밴드 */
+.band{display:flex;gap:6px;padding:3px 14px 9px;flex:0 0 auto;overflow:hidden}
+.chip{font-size:11px;padding:4px 10px;border-radius:999px;white-space:nowrap;font-weight:500}
+.chip.off{background:var(--line-2);color:var(--ink-3)}
+
+/* 입력바 */
+.inp{margin-top:auto;border-top:1px solid var(--line);padding:9px 13px;
+     display:flex;align-items:center;gap:9px;background:#fff;flex:0 0 auto}
+.inp .f{flex:1;color:var(--ink-3);font-size:13px}
+.inp .d{color:var(--ink-3);font-size:15px}
+.inp.open{flex-direction:column;align-items:stretch;gap:8px;background:#fbfcfc}
+.inp.open .row{display:flex;gap:6px;align-items:center}
+.kb{height:82px;background:#d6dae0;flex:0 0 auto;display:flex;align-items:center;
+    justify-content:center;color:#8b9199;font-size:10px;letter-spacing:.1em}
+
+.pro{font-size:12px;color:var(--ink-2);margin-top:16px}
+.pro b{color:var(--ink);font-weight:600}
+.pro ul{margin:5px 0 0 15px}
+.pro li{margin:3px 0}
+.neg{color:#a8564f}
+
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:16px;background:#fff}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#fafbfb;font-weight:600;font-size:12px}
+td:first-child{font-weight:600;width:130px}
+.note{background:#fff;border:1px solid var(--line);border-left:3px solid #21252b;
+      border-radius:0 10px 10px 0;padding:14px 16px;font-size:13px;color:var(--ink-2);margin-top:18px}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>할일 앱 — 디자인 시안 비교</h1>
+<p class="sub">Phase 5 · 뮤트 파스텔 · 미니멀 · 모바일 우선(375px 기준) · 2026-08-03</p>
+
+<div class="hr"></div>
+
+<!-- ═══ 팔레트 ═══ -->
+<h2>1. 파스텔 팔레트 12색</h2>
+<p class="sub">각 색은 <b>배경 / 텍스트 / 점</b> 3단계 톤 세트다. 카드 배경은 옅게, 텍스트는 같은 색상의 어두운 톤으로 WCAG AA(4.5:1)를 확보한다.</p>
+
+<div class="pal">
+  <div class="sw"><div class="sw-top" style="background:var(--c1-bg);color:var(--c1-tx)">세이지<span class="dot" style="background:var(--c1-dt)"></span></div><div class="sw-bot"><div>EDF2E9</div><div>3F5334</div><div>6E8F57</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c2-bg);color:var(--c2-tx)">더스티 로즈<span class="dot" style="background:var(--c2-dt)"></span></div><div class="sw-bot"><div>F7EAEC</div><div>6B3A42</div><div>A96F7B</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c3-bg);color:var(--c3-tx)">미스트 블루<span class="dot" style="background:var(--c3-dt)"></span></div><div class="sw-bot"><div>E8F0F5</div><div>2F4A5C</div><div>5E88A2</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c4-bg);color:var(--c4-tx)">라벤더<span class="dot" style="background:var(--c4-dt)"></span></div><div class="sw-bot"><div>EFEBF5</div><div>473F5C</div><div>7C6FA2</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c5-bg);color:var(--c5-tx)">클레이<span class="dot" style="background:var(--c5-dt)"></span></div><div class="sw-bot"><div>F7EBE4</div><div>6B4632</div><div>A87356</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c6-bg);color:var(--c6-tx)">머스터드<span class="dot" style="background:var(--c6-dt)"></span></div><div class="sw-bot"><div>F5EFDF</div><div>5E4C22</div><div>997E38</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c7-bg);color:var(--c7-tx)">올리브<span class="dot" style="background:var(--c7-dt)"></span></div><div class="sw-bot"><div>F0F1E3</div><div>4C5230</div><div>7B8349</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c8-bg);color:var(--c8-tx)">티일<span class="dot" style="background:var(--c8-dt)"></span></div><div class="sw-bot"><div>E4F0EF</div><div>2C4E4C</div><div>558C88</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c9-bg);color:var(--c9-tx)">플럼<span class="dot" style="background:var(--c9-dt)"></span></div><div class="sw-bot"><div>F3EAF1</div><div>573C52</div><div>8E6885</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c10-bg);color:var(--c10-tx)">샌드<span class="dot" style="background:var(--c10-dt)"></span></div><div class="sw-bot"><div>F4EFE7</div><div>5C4E3A</div><div>93805F</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c11-bg);color:var(--c11-tx)">슬레이트<span class="dot" style="background:var(--c11-dt)"></span></div><div class="sw-bot"><div>EAEDF3</div><div>3A4459</div><div>67738F</div></div></div>
+  <div class="sw"><div class="sw-top" style="background:var(--c12-bg);color:var(--c12-tx)">코랄<span class="dot" style="background:var(--c12-dt)"></span></div><div class="sw-bot"><div>F9EAE7</div><div>6E3F36</div><div>AF6E5E</div></div></div>
+</div>
+
+<div class="note">
+<b>기본 배정</b> — 직장 = 미스트 블루 · 개인 = 세이지 · 가족 = 클레이.<br>
+서로 색상환에서 멀어 375px의 작은 점으로도 구분되고, 셋 다 채도가 낮아 함께 있어도 시끄럽지 않다.
+</div>
+
+<div class="hr"></div>
+
+<!-- ═══ 시안 ═══ -->
+<h2>2. 레이아웃 시안 3안</h2>
+<p class="sub">세 시안 모두 미니멀·뮤트 파스텔이라는 공통 언어를 쓴다. <b>다른 것은 구조다</b> — 달력과 리스트 중 누가 화면을 차지하는가.</p>
+
+<div class="opts">
+
+  <!-- ─── 시안 A ─── -->
+  <div class="opt">
+    <span class="tag">시안 A</span>
+    <h2>달력 우선</h2>
+    <p class="philo">“이 앱은 달력이다.” 월간 조망이 항상 화면 절반을 차지하고, 오늘 할일은 그 아래에 딸려 온다.</p>
+
+    <div class="phone">
+      <div class="st"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="hd"><b>2026년 8월</b><span class="ic">⚙</span></div>
+      <div class="cal">
+        <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div class="grid">
+          <div class="cell dim">27</div><div class="cell dim">28</div><div class="cell dim">29</div>
+          <div class="cell dim">30</div><div class="cell dim">31</div>
+          <div class="cell">1<div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+          <div class="cell">2</div>
+
+          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
+          <div class="cell">4<div class="dots"><i style="background:var(--c3-dt)"></i><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">5<div class="dots"><i style="background:var(--c5-dt)"></i></div></div>
+          <div class="cell">6</div>
+          <div class="cell">7<div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+          <div class="cell">8<div class="bar" style="background:var(--c3-dt)"></div></div>
+          <div class="cell">9<div class="bar" style="background:var(--c3-dt)"></div></div>
+
+          <div class="cell">10<div class="bar" style="background:var(--c3-dt)"></div></div>
+          <div class="cell">11</div>
+          <div class="cell">12<div class="dots"><i style="background:var(--c5-dt)"></i><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">13</div><div class="cell">14</div>
+          <div class="cell">15<div class="dots"><i style="background:var(--c5-dt)"></i></div></div>
+          <div class="cell">16</div>
+
+          <div class="cell">17</div><div class="cell">18</div><div class="cell">19</div>
+          <div class="cell">20<div class="dots"><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">21</div><div class="cell">22</div><div class="cell">23</div>
+        </div>
+      </div>
+      <div class="sect"><span>8월 3일 · 오늘</span><span>3개</span></div>
+      <div class="list">
+        <div class="item" style="background:var(--c3-bg);color:var(--c3-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span>직장</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c5-bg);color:var(--c5-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span>가족</span></div></div>
+        </div>
+      </div>
+      <div class="inp"><span class="d">✎</span><span class="f">할일 추가…</span><span class="d">⋯</span></div>
+    </div>
+
+    <div class="pro">
+      <b>강점</b>
+      <ul><li>“언제”가 압도적으로 잘 보인다 — 기간형 막대가 살아난다</li>
+      <li>다른 할일 앱과 가장 확실히 구별된다</li></ul>
+      <b>약점</b>
+      <ul><li class="neg">오늘 할일이 <b>2개만</b> 보인다. 3개 넘으면 스크롤</li>
+      <li class="neg">S2(아침 “오늘 뭐 있지”)에 즉답을 못 준다</li></ul>
+      <b>주 타깃</b> — 서지호(첫인상) · 주말 계획 세우는 하윤
+    </div>
+  </div>
+
+  <!-- ─── 시안 B ─── -->
+  <div class="opt">
+    <span class="tag">시안 B</span>
+    <h2>리스트 우선</h2>
+    <p class="philo">“이 앱은 오늘이다.” 주간 스트립만 상시 노출하고, 월간 달력은 필요할 때 펼친다.</p>
+
+    <div class="phone">
+      <div class="st"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="hd"><b>8월 3일 <span style="font-size:12px;color:var(--ink-3);font-weight:400">월요일</span></b><span class="ic">▦ ⚙</span></div>
+      <div class="week">
+        <div class="wd"><span>일</span><b>2</b><div class="dots"></div></div>
+        <div class="wd on"><span>월</span><b>3</b><div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
+        <div class="wd"><span>화</span><b>4</b><div class="dots"><i style="background:var(--c3-dt)"></i><i style="background:var(--c1-dt)"></i></div></div>
+        <div class="wd"><span>수</span><b>5</b><div class="dots"><i style="background:var(--c5-dt)"></i></div></div>
+        <div class="wd"><span>목</span><b>6</b><div class="dots"></div></div>
+        <div class="wd"><span>금</span><b>7</b><div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+        <div class="wd"><span>토</span><b>8</b><div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+      </div>
+      <div class="sect"><span>오늘 할일</span><span>1 / 4 완료</span></div>
+      <div class="list">
+        <div class="item" style="background:var(--c3-bg);color:var(--c3-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span>직장</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c5-bg);color:var(--c5-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span>가족</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c3-bg);color:var(--c3-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">3분기 캠페인 보고서</div>
+          <div class="it-m"><span>직장</span><span>8/14까지</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c1-bg);color:var(--c1-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">30분 걷기</div>
+          <div class="it-m"><span>개인</span><span>12/31일</span></div></div>
+        </div>
+        <div class="item done" style="background:var(--c5-bg);color:var(--c5-tx)">
+          <div class="cb on"></div><div class="it-b"><div class="it-t">장보기</div>
+          <div class="it-m"><span>가족</span></div></div>
+        </div>
+      </div>
+      <div class="inp"><span class="d">✎</span><span class="f">할일 추가…</span><span class="d">⋯</span></div>
+    </div>
+
+    <div class="pro">
+      <b>강점</b>
+      <ul><li>오늘 할일이 <b>5개까지</b> 스크롤 없이 보인다 — S2에 즉답</li>
+      <li>입력·체크 동선이 가장 짧다. E1과 궁합이 좋다</li></ul>
+      <b>약점</b>
+      <ul><li class="neg">월간 조망이 <b>사라진다</b> — 기간형 막대가 죽는다</li>
+      <li class="neg">“캘린더 + 체크”라는 차별점이 흐려짐. 흔한 할일 앱처럼 보임</li></ul>
+      <b>주 타깃</b> — 매일의 하윤 (아침·점심·퇴근 세 번)
+    </div>
+  </div>
+
+  <!-- ─── 시안 C ─── -->
+  <div class="opt">
+    <span class="tag">시안 C · 추천</span>
+    <h2>접이식 균형</h2>
+    <p class="philo">“달력은 보되, 오늘에 자리를 내준다.” 월간을 압축해 상시 노출하고, 위로 쓸어올리면 주간으로 접힌다.</p>
+
+    <div class="phone">
+      <div class="st"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="hd"><b>2026년 8월</b><span class="ic">⚙</span></div>
+      <div class="band">
+        <span class="chip" style="background:var(--c3-bg);color:var(--c3-tx)">직장</span>
+        <span class="chip" style="background:var(--c1-bg);color:var(--c1-tx)">개인</span>
+        <span class="chip" style="background:var(--c5-bg);color:var(--c5-tx)">가족</span>
+        <span class="chip off">+</span>
+      </div>
+      <div class="cal tight">
+        <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div class="grid">
+          <div class="cell dim">27</div><div class="cell dim">28</div><div class="cell dim">29</div>
+          <div class="cell dim">30</div><div class="cell dim">31</div>
+          <div class="cell">1<div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+          <div class="cell">2</div>
+
+          <div class="cell today">3<div class="dots"><i style="background:#fff"></i><i style="background:#fff"></i><i style="background:#fff"></i></div></div>
+          <div class="cell">4<div class="dots"><i style="background:var(--c3-dt)"></i><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">5<div class="dots"><i style="background:var(--c5-dt)"></i></div></div>
+          <div class="cell">6</div>
+          <div class="cell">7<div class="dots"><i style="background:var(--c3-dt)"></i></div></div>
+          <div class="cell">8<div class="bar" style="background:var(--c3-dt)"></div></div>
+          <div class="cell">9<div class="bar" style="background:var(--c3-dt)"></div></div>
+
+          <div class="cell">10<div class="bar" style="background:var(--c3-dt)"></div></div>
+          <div class="cell">11</div>
+          <div class="cell">12<div class="dots"><i style="background:var(--c5-dt)"></i><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">13</div><div class="cell">14</div>
+          <div class="cell">15<div class="dots"><i style="background:var(--c5-dt)"></i></div></div>
+          <div class="cell">16</div>
+
+          <div class="cell">17</div><div class="cell">18</div><div class="cell">19</div>
+          <div class="cell">20<div class="dots"><i style="background:var(--c1-dt)"></i></div></div>
+          <div class="cell">21</div><div class="cell">22</div><div class="cell">23</div>
+        </div>
+      </div>
+      <div class="fold"><span>⌄ 밀린 할일 <b>3</b></span><span style="color:var(--ink-3)">동기화 대기 1</span></div>
+      <div class="sect"><span>8월 3일 · 오늘</span><span>1 / 4 완료</span></div>
+      <div class="list">
+        <div class="item" style="background:var(--c3-bg);color:var(--c3-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">주간보고 초안</div>
+          <div class="it-m"><span>직장</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c5-bg);color:var(--c5-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">어린이집 준비물</div>
+          <div class="it-m"><span>가족</span></div></div>
+        </div>
+        <div class="item" style="background:var(--c1-bg);color:var(--c1-tx)">
+          <div class="cb"></div><div class="it-b"><div class="it-t">30분 걷기</div>
+          <div class="it-m"><span>개인</span><span>12/31일</span></div></div>
+        </div>
+      </div>
+      <div class="inp open">
+        <div class="row">
+          <span class="chip" style="background:var(--c3-bg);color:var(--c3-tx)">직장</span>
+          <span class="chip off">개인</span>
+          <span class="chip" style="background:var(--c5-bg);color:var(--c5-tx);outline:1.5px solid var(--c5-dt)">가족</span>
+        </div>
+        <div class="row"><span class="d">✎</span><span class="f" style="color:var(--ink)">우유 사기<span style="opacity:.4">|</span></span><span class="d">⋯</span></div>
+      </div>
+      <div class="kb">키 보 드</div>
+    </div>
+
+    <div class="pro">
+      <b>강점</b>
+      <ul><li>월간 조망과 오늘 리스트를 <b>둘 다</b> 확보 (P3 충족)</li>
+      <li>상단 카테고리 밴드가 <b>필터 + 색 편집 진입점</b>을 겸한다 → E4가 2탭 안에 들어옴</li>
+      <li>밀린 할일(E5)과 동기화 표식의 자리가 자연스럽게 생긴다</li></ul>
+      <b>약점</b>
+      <ul><li class="neg">요소가 가장 많다 — 밀도 관리에 실패하면 “복잡한 앱”이 된다</li>
+      <li class="neg">접기 인터랙션 구현 비용이 추가된다</li></ul>
+      <b>주 타깃</b> — 하윤 전체 시나리오 · 서지호도 3초 안에 이해
+    </div>
+  </div>
+
+</div>
+
+<div class="hr"></div>
+
+<h2>3. 비교</h2>
+<table>
+<tr><th>기준</th><th>A 달력 우선</th><th>B 리스트 우선</th><th>C 접이식 균형</th></tr>
+<tr><td>오늘 할일 노출</td><td>2개</td><td><b>5개</b></td><td>3개 (접으면 6개)</td></tr>
+<tr><td>월간 조망</td><td><b>최상</b></td><td>없음</td><td>있음 (압축)</td></tr>
+<tr><td>기간형 막대</td><td><b>잘 보임</b></td><td>표현 불가</td><td>보임</td></tr>
+<tr><td>S1 최악 입력</td><td>보통</td><td><b>최상</b></td><td><b>최상</b></td></tr>
+<tr><td>S2 아침 지하철</td><td>약함</td><td><b>최상</b></td><td>좋음</td></tr>
+<tr><td>S5 색 바꾸기 (E4)</td><td>설정 진입 필요</td><td>설정 진입 필요</td><td><b>밴드에서 2탭</b></td></tr>
+<tr><td>E5 밀린 할일 자리</td><td>애매</td><td>리스트 위</td><td><b>전용 영역</b></td></tr>
+<tr><td>차별성 (vs 흔한 할일앱)</td><td><b>최상</b></td><td>낮음</td><td>높음</td></tr>
+<tr><td>구현 비용</td><td>낮음</td><td><b>가장 낮음</b></td><td>중간</td></tr>
+<tr><td>밀도 실패 위험</td><td>낮음</td><td>낮음</td><td><b>높음</b></td></tr>
+</table>
+
+<div class="note">
+<b>추천: 시안 C</b><br>
+A는 S2(주 사용 시점)에 약하고, B는 이 앱의 정체성인 “캘린더의 날짜 감각”을 버린다.
+C는 둘을 모두 지키면서 E4(색 편집 2탭)와 E5(밀린 할일)의 자리까지 만들어 준다.
+대신 <b>밀도 관리가 유일한 위험</b>이므로, 요소 하나를 더할 때마다 375px 세로 예산을 다시 계산해야 한다.
+<br><br>
+<b>하이브리드도 가능하다</b> — 예: C의 구조에 B의 “접힌 기본 상태”를 채택(주간으로 시작, 탭하면 월간 펼침).
+S2에서는 B처럼 동작하고, 계획을 세울 때만 A처럼 열린다.
+</div>
+
+</div>
+</body>
+</html>
