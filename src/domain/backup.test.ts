@@ -50,7 +50,12 @@ const payload: BackupPayload = {
     }),
   ],
   completions: [{ taskId: "t2", date: "2026-08-03" }],
-  settings: { theme: "dark", hideCompleted: true, hiddenCategoryIds: ["c1"] },
+  settings: {
+    theme: "dark",
+    hideCompleted: true,
+    hiddenCategoryIds: ["c1"],
+    notifySound: false,
+  },
 };
 
 function roundTrip(p: BackupPayload = payload) {

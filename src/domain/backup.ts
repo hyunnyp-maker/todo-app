@@ -31,6 +31,7 @@ export interface BackupSettings {
   theme: ThemeMode;
   hideCompleted: boolean;
   hiddenCategoryIds: string[];
+  notifySound: boolean;
 }
 
 export interface BackupPayload {
@@ -52,6 +53,7 @@ export const DEFAULT_BACKUP_SETTINGS: BackupSettings = {
   theme: "system",
   hideCompleted: false,
   hiddenCategoryIds: [],
+  notifySound: true,
 };
 
 export function buildBackupFile(
@@ -82,6 +84,8 @@ function parseSettings(v: unknown): BackupSettings {
     hiddenCategoryIds: Array.isArray(v.hiddenCategoryIds)
       ? v.hiddenCategoryIds.filter((x): x is string => typeof x === "string")
       : [],
+    // 소리 설정이 없던 시절의 백업은 기본값(켜짐)으로 읽는다
+    notifySound: v.notifySound === undefined ? true : v.notifySound === true,
   };
 }
 

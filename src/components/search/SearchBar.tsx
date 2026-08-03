@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { SearchIcon } from "@/components/ui/icons";
 
 interface Props {
   /** debounce를 거친 값이 올라온다 */
@@ -43,8 +44,8 @@ export function SearchBar({ onQueryChange, onClose }: Props) {
         className="flex min-h-[44px] flex-1 items-center gap-[8px] rounded-[12px] px-[12px]"
         style={{ background: "var(--line-2)" }}
       >
-        <span aria-hidden className="text-[13px] text-ink-3">
-          ⌕
+        <span className="flex shrink-0 text-ink-3">
+          <SearchIcon size={18} />
         </span>
         <input
           ref={inputRef}

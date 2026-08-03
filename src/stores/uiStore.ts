@@ -20,6 +20,9 @@ interface UiState {
   hideCompleted: boolean;
   overdueOpen: boolean;
   theme: ThemeMode;
+  /** 알림이 뜰 때 소리도 낼지. 알림 자체와 별개로 끌 수 있다 */
+  notifySound: boolean;
+  setNotifySound: (v: boolean) => void;
   setTheme: (mode: ThemeMode) => void;
 
   selectDate: (date: ISODate) => void;
@@ -62,6 +65,9 @@ export const useUiStore = create<UiState>()(
       hideCompleted: false,
       overdueOpen: false,
       theme: "system",
+      notifySound: true,
+
+      setNotifySound: (v) => set({ notifySound: v }),
 
       setTheme: (mode) => {
         set({ theme: mode });
@@ -98,6 +104,7 @@ export const useUiStore = create<UiState>()(
         hiddenCategoryIds: s.hiddenCategoryIds,
         hideCompleted: s.hideCompleted,
         theme: s.theme,
+        notifySound: s.notifySound,
       }),
     },
   ),

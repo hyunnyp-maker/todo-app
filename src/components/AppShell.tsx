@@ -16,6 +16,7 @@ import { OverdueFold } from "@/components/task/OverdueFold";
 import { TaskEditSheet, type TaskDraft } from "@/components/task/TaskEditSheet";
 import { TaskList } from "@/components/task/TaskList";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { SearchIcon, SettingsIcon } from "@/components/ui/icons";
 import {
   countTasksIn,
   hasUncategorized,
@@ -60,6 +61,8 @@ export function AppShell() {
   const toggleOverdue = useUiStore((s) => s.toggleOverdue);
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
+  const notifySound = useUiStore((s) => s.notifySound);
+  const setNotifySound = useUiStore((s) => s.setNotifySound);
 
   const today = useToday();
 
@@ -114,7 +117,7 @@ export function AppShell() {
 
   // 알림은 권한이 있을 때만 돈다. 여기서 권한을 요청하지 않는다
   const { granted: canNotify } = useNotificationPermission();
-  useReminders(tasks, completions, canNotify);
+  useReminders(tasks, completions, canNotify, notifySound);
 
   // 필터는 달력과 리스트에 똑같이 적용된다
   const calendarTasks = useMemo(
@@ -258,17 +261,17 @@ export function AppShell() {
               }}
               aria-label="검색"
               aria-expanded={searchOpen}
-              className="px-[6px] text-[15px] text-ink-3"
+              className="flex size-[44px] items-center justify-center text-ink-2"
             >
-              ⌕
+              <SearchIcon />
             </button>
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
               aria-label="설정"
-              className="px-1 text-[15px] text-ink-3"
+              className="flex size-[44px] items-center justify-center text-ink-2"
             >
-              ⚙
+              <SettingsIcon />
             </button>
           </div>
         </div>
@@ -474,6 +477,8 @@ export function AppShell() {
         onHideCompletedChange={setHideCompleted}
         theme={theme}
         onThemeChange={setTheme}
+        notifySound={notifySound}
+        onNotifySoundChange={setNotifySound}
         onClose={() => setSettingsOpen(false)}
       />
 

@@ -36,6 +36,7 @@ export function useBackup() {
           theme: ui.theme,
           hideCompleted: ui.hideCompleted,
           hiddenCategoryIds: ui.hiddenCategoryIds,
+          notifySound: ui.notifySound,
         },
       },
       new Date().toISOString(),
@@ -79,6 +80,7 @@ export function useBackup() {
     ui.setHideCompleted(backup.data.settings.hideCompleted);
     ui.setTheme(backup.data.settings.theme);
     ui.setHiddenCategoryIds(backup.data.settings.hiddenCategoryIds);
+    ui.setNotifySound(backup.data.settings.notifySound);
 
     // 캐시에 남은 옛 데이터를 지운다. 새로 읽어야 화면이 복원된 상태가 된다
     await qc.invalidateQueries({ queryKey: ["tasks", scope] });

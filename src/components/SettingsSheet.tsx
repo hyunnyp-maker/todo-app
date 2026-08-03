@@ -9,6 +9,7 @@ import type { ThemeMode } from "@/domain/types";
 import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import { useSession } from "@/hooks/useSession";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
+import { playChime } from "@/lib/sound";
 
 const THEMES: { mode: ThemeMode; label: string; hint: string }[] = [
   { mode: "light", label: "라이트", hint: "밝은 배경" },
@@ -22,6 +23,8 @@ interface Props {
   onHideCompletedChange: (v: boolean) => void;
   theme: ThemeMode;
   onThemeChange: (mode: ThemeMode) => void;
+  notifySound: boolean;
+  onNotifySoundChange: (v: boolean) => void;
   onClose: () => void;
 }
 
@@ -31,6 +34,8 @@ export function SettingsSheet({
   onHideCompletedChange,
   theme,
   onThemeChange,
+  notifySound,
+  onNotifySoundChange,
   onClose,
 }: Props) {
   const { user, isConfigured } = useSession();
@@ -171,6 +176,40 @@ export function SettingsSheet({
             알림 권한 허용
           </button>
         )}
+
+        <div className="mt-[10px] flex items-center gap-[8px]">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={notifySound}
+            onClick={() => {
+              const next = !notifySound;
+              onNotifySoundChange(next);
+              // 켠 순간 한 번 들려준다. 이 탭이 자동재생 잠금을 푸는 사용자 제스처도 된다
+              if (next) playChime();
+            }}
+            className="flex min-h-[44px] flex-1 items-center justify-between rounded-[10px] bg-line-2 px-[12px] text-left"
+          >
+            <span className="text-[13px]">알림 소리</span>
+            <span
+              aria-hidden
+              className="ml-3 flex h-[24px] w-[42px] shrink-0 items-center rounded-full px-[3px] transition-colors"
+              style={{ background: notifySound ? "var(--ink)" : "#c8ccd1" }}
+            >
+              <span
+                className="size-[18px] rounded-full bg-white transition-transform"
+                style={{ transform: notifySound ? "translateX(18px)" : "none" }}
+              />
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => playChime()}
+            className="min-h-[44px] shrink-0 rounded-[10px] bg-line-2 px-[14px] text-[12.5px] font-semibold"
+          >
+            소리 듣기
+          </button>
+        </div>
       </div>
 
       <BackupSection />
